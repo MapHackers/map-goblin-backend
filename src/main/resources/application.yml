@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mapgoblin
+    username: mapgoblin
+    password: mapgoblin
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        # default_batch_fetch_size: 100
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # generate-ddl: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    # org.hibernate.type: trace
