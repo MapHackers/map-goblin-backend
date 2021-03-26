@@ -13,8 +13,7 @@ import static javax.persistence.FetchType.*;
 @Getter
 public class Repository extends BaseEntity {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     @Column(name = "repository_id")
     private Long id;
 
@@ -28,9 +27,9 @@ public class Repository extends BaseEntity {
     @JoinColumn(name = "map_id")
     private Map map;
 
-    private int like;
+    private int likeCount;
 
-    private int dislike;
+    private int dislikeCount;
 
     @OneToMany(mappedBy = "repository")
     private List<RepositoryCategory> categories = new ArrayList<>();
