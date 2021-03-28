@@ -27,5 +27,5 @@ public class Category extends BaseEntity {
     private List<Category> child = new ArrayList<>();
 
     @OneToMany(mappedBy = "category")
-    private List<RepositoryCategory> repositories = new ArrayList<>();
+    private List<SpaceCategory> spaces = new ArrayList<>();
 }

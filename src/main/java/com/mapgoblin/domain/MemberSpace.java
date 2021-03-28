@@ -10,11 +10,11 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
-public class MemberRepository extends BaseEntity {
+public class MemberSpace extends BaseEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "member_repository_id")
+    @Column(name = "member_space_id")
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -22,8 +22,8 @@ public class MemberRepository extends BaseEntity {
     private Member member;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "repository_id")
-    private Repository repository;
+    @JoinColumn(name = "space_id")
+    private Space space;
 
     @Enumerated(EnumType.STRING)
     private SourceType source;
