@@ -31,5 +31,5 @@ public class Member extends BaseEntity{
     private MemberRole role;
 
     @OneToMany(mappedBy = "member")
-    private List<MemberRepository> repositories = new ArrayList<>();
+    private List<MemberSpace> spaces = new ArrayList<>();
 }

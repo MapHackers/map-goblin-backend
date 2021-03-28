@@ -20,6 +20,6 @@ public class Issue extends BaseEntity {
     private String content;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "repository_id")
-    private Repository repository;
+    @JoinColumn(name = "space_id")
+    private Space space;
 }

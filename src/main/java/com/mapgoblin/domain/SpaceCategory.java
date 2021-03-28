@@ -9,16 +9,16 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
-public class RepositoryCategory extends BaseEntity {
+public class SpaceCategory extends BaseEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "repository_category_id")
+    @Column(name = "space_category_id")
     private Long id;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "repository_id")
-    private Repository repository;
+    @JoinColumn(name = "space_id")
+    private Space space;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
