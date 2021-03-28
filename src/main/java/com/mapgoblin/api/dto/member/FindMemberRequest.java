@@ -5,14 +5,9 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CreateMemberResponse {
-
-    private Long id;
+public class FindMemberRequest {
 
     private String userId;
 
-    private String name;
-
-    private String email;
-
+    private String password;
 }

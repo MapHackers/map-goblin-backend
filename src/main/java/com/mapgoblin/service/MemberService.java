@@ -15,6 +15,30 @@ import org.springframework.stereotype.Service;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+
+    /**
+     * Find member information with pk
+     *
+     * @param memberId
+     * @return
+     */
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(()->new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+
+    /**
+     * Find member information with userId
+     *
+     * @param userId
+     * @return
+     */
+    public Member findByUserId(String userId) {
+
+        return memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
+    }
+
     /**
      * Save member information
      *
