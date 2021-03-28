@@ -3,6 +3,7 @@ package com.mapgoblin.api.controller;
 import com.mapgoblin.api.dto.member.*;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.base.MemberRole;
+import com.mapgoblin.exception.WrongPasswordException;
 import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,4 +41,28 @@ public class MemberApi {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Sign In
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/signin")
+    public ResponseEntity<?> signin(@RequestBody FindMemberRequest request) {
+
+        Member member = memberService.findByUserId(request.getUserId());
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new WrongPasswordException("잘못된 비밀번호입니다.");
+        }
+
+        FindMemberResponse response = new FindMemberResponse(
+                member.getId(),
+                member.getUserId(),
+                member.getName(),
+                member.getEmail(),
+                jwtTokenProvider.createToken(member.getEmail(), member.getRole()));
+
+        return ResponseEntity.ok(response);
+    }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CreateMemberResponse {
+public class FindMemberResponse {
 
     private Long id;
 
@@ -15,4 +15,5 @@ public class CreateMemberResponse {
 
     private String email;
 
+    private String token;
 }
