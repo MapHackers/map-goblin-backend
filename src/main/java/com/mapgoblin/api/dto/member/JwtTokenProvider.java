@@ -61,7 +61,7 @@ public class JwtTokenProvider {
      */
     public Authentication getAuthentication(String token) {
 
-        Member member = memberService.findById(Long.parseLong(this.getUserPk(token)));
+        Member member = memberService.findByUserId(this.getUserPk(token));
 
         return new UsernamePasswordAuthenticationToken(member, "");
     }
