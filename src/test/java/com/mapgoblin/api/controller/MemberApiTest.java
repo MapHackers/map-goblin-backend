@@ -41,7 +41,7 @@ class MemberApiTest {
         CreateMemberRequest request = new CreateMemberRequest("gildong123", "홍길동", "gildong@gmail.com", "1q2w3e4r");
 
         //when
-        ResultActions actions = mockMvc.perform(post("/signup")
+        ResultActions actions = mockMvc.perform(post("/members")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
@@ -52,12 +52,12 @@ class MemberApiTest {
 
     @Test
     @Order(2)
-    public void signin() throws Exception {
+    public void login() throws Exception {
         //given
         FindMemberRequest request = new FindMemberRequest("gildong123", "1q2w3e4r");
 
         //when
-        ResultActions actions = mockMvc.perform(post("/signin")
+        ResultActions actions = mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
