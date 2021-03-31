@@ -1,8 +1,6 @@
 package com.mapgoblin.api.dto.member;
 
-import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.base.MemberRole;
-import com.mapgoblin.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +8,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +27,7 @@ public class JwtTokenProvider {
      */
     private long tokenValidTime = 30 * 60 * 1000L;
 
-    private final MemberService memberService;
+    private final UserDetailsService userDetailsService;
 
     @PostConstruct
     protected void init() {
@@ -43,7 +43,7 @@ public class JwtTokenProvider {
      */
     public String createToken(String userPk, MemberRole role) {
         Claims claims = Jwts.claims().setSubject(userPk);
-        claims.put("role", role);
+        claims.put("role", role.toString());
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -61,9 +61,9 @@ public class JwtTokenProvider {
      */
     public Authentication getAuthentication(String token) {
 
-        Member member = memberService.findByUserId(this.getUserPk(token));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
 
-        return new UsernamePasswordAuthenticationToken(member, "");
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     /**
