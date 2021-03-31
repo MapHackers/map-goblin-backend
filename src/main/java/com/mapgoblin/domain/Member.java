@@ -4,6 +4,7 @@ import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.MemberRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
@@ -48,12 +49,16 @@ public class Member extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
+
+        list.add(new SimpleGrantedAuthority(this.role.toString()));
+
+        return list;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return this.userId;
     }
 
     @Override
