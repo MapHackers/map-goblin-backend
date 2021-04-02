@@ -29,7 +29,7 @@ public class MemberApi {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateMemberRequest request) {
 
-        Member member = new Member(
+        Member member = Member.createMember(
                 request.getUserId(),
                 request.getName(),
                 request.getEmail(),
