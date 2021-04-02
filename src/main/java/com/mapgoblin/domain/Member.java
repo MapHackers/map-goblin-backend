@@ -2,7 +2,10 @@ package com.mapgoblin.domain;
 
 import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.MemberRole;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +17,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity implements UserDetails {
 
     @Id
@@ -31,20 +36,39 @@ public class Member extends BaseEntity implements UserDetails {
 
     private int reward;
 
+    private int recode;
+
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
     @OneToMany(mappedBy = "member")
     private List<MemberSpace> spaces = new ArrayList<>();
 
-    public Member() {}
+    /**
+     * Create Member method
+     *
+     * @param userId
+     * @param name
+     * @param email
+     * @param password
+     * @param role
+     * @return
+     */
+    public static Member createMember(String userId, String name, String email, String password, MemberRole role) {
+        Member member = new Member();
 
-    public Member(String userId, String name, String email, String password, MemberRole role) {
-        this.userId = userId;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
+        member.setUserId(userId);
+        member.setName(name);
+        member.setEmail(email);
+        member.setPassword(password);
+        member.setRole(role);
+
+        return member;
+    }
+
+    public void addMemberSpace(MemberSpace memberSpace) {
+        spaces.add(memberSpace);
+        memberSpace.setMember(this);
     }
 
     @Override

@@ -3,7 +3,10 @@ package com.mapgoblin.domain.mapdata;
 import com.mapgoblin.domain.Layer;
 import com.mapgoblin.domain.Review;
 import com.mapgoblin.domain.base.BaseEntity;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -17,6 +20,8 @@ import static javax.persistence.InheritanceType.JOINED;
 @Inheritance(strategy = JOINED)
 @DiscriminatorColumn(name = "dtype")
 @Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class MapData extends BaseEntity {
 
     @Id @GeneratedValue
@@ -35,4 +40,9 @@ public abstract class MapData extends BaseEntity {
 
     @OneToMany(mappedBy = "mapData")
     private List<Review> reviews = new ArrayList<>();
+
+    public void addReview(Review review) {
+        this.reviews.add(review);
+        review.setMapData(this);
+    }
 }
