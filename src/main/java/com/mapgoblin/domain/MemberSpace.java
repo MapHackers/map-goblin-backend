@@ -2,7 +2,10 @@ package com.mapgoblin.domain;
 
 import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.SourceType;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -10,6 +13,8 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberSpace extends BaseEntity {
 
     @Id
@@ -27,4 +32,32 @@ public class MemberSpace extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private SourceType source;
+
+    /**
+     * Create MemberSpace method
+     *
+     * @param space
+     * @return
+     */
+    public static MemberSpace createMemberSpace(Space space) {
+        MemberSpace memberSpace = new MemberSpace();
+        memberSpace.setSpace(space);
+        memberSpace.setSource(SourceType.HOST);
+
+        return memberSpace;
+    }
+
+    /**
+     * Clone MemberSpace method
+     *
+     * @param space
+     * @return
+     */
+    public static MemberSpace cloneMemberSpace(Space space) {
+        MemberSpace memberSpace = new MemberSpace();
+        memberSpace.setSpace(space);
+        memberSpace.setSource(SourceType.CLONE);
+
+        return memberSpace;
+    }
 }
