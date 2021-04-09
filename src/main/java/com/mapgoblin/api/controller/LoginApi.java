@@ -75,7 +75,7 @@ public class LoginApi {
                         findMember.getUserId(),
                         findMember.getName(),
                         findMember.getEmail(),
-                        null);
+                        jwtTokenProvider.createToken(findMember.getUserId(), findMember.getRole()));
 
                 return ResponseEntity.ok(response);
             }
