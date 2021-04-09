@@ -8,6 +8,7 @@ import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,11 +56,15 @@ public class MemberApi {
     }
 
     @PostMapping("/{id}/password")
-    public ResponseEntity<?> modifyPassword(@PathVariable Long id, @RequestBody CreateMemberRequest request) {
+    public ResponseEntity<?> modifyPassword(@PathVariable Long id, @RequestBody CreateMemberRequest request, @AuthenticationPrincipal Member member) {
 
-        Member member = memberService.modifyPassword(id, passwordEncoder.encode(request.getPassword()));
+        if (member.getId() != id) {
+            return ApiResult.errorMessage("잘못된 접근입니다.", HttpStatus.BAD_REQUEST);
+        }
 
-        if (member == null) {
+        Member findMember = memberService.modifyPassword(id, passwordEncoder.encode(request.getPassword()));
+
+        if (findMember == null) {
             return ApiResult.errorMessage("비밀번호 변경 실패", HttpStatus.BAD_REQUEST);
         }
 
