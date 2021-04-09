@@ -46,4 +46,22 @@ public class LoginApi {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/find")
+    public ResponseEntity<?> findId(@RequestBody FindMemberRequest request) {
+
+        Member findMember = memberService.findByEmail(request.getEmail());
+
+        if (request.getUserId() == null) {
+            if (findMember == null){
+                return ApiResult.errorMessage("이메일로 가입된 아이디가 없습니다.", HttpStatus.UNAUTHORIZED);
+            }
+        }else{
+            if (findMember == null || !findMember.getUserId().equals(request.getUserId())){
+                return ApiResult.errorMessage("이메일과 아이디가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+            }
+        }
+
+        return ApiResult.errorMessage("success", HttpStatus.OK);
+    }
 }
