@@ -1,12 +1,13 @@
 package com.mapgoblin.api.controller;
 
+import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.member.FindMemberRequest;
 import com.mapgoblin.api.dto.member.FindMemberResponse;
 import com.mapgoblin.api.dto.member.JwtTokenProvider;
 import com.mapgoblin.domain.Member;
-import com.mapgoblin.exception.WrongPasswordException;
 import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,7 @@ public class LoginApi {
         Member member = memberService.findByUserId(request.getUserId());
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new WrongPasswordException("잘못된 비밀번호입니다.");
+            return ApiResult.errorMessage("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
         }
 
         FindMemberResponse response = new FindMemberResponse(
