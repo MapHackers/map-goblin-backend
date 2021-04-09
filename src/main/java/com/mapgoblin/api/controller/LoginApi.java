@@ -47,6 +47,12 @@ public class LoginApi {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Find user id, password
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/find")
     public ResponseEntity<?> findId(@RequestBody FindMemberRequest request) {
 
@@ -55,13 +61,22 @@ public class LoginApi {
         if (request.getUserId() == null) {
             if (findMember == null){
                 return ApiResult.errorMessage("이메일로 가입된 아이디가 없습니다.", HttpStatus.UNAUTHORIZED);
+            }else{
+                return ResponseEntity.ok(new ApiResult(findMember.getUserId()));
             }
         }else{
             if (findMember == null || !findMember.getUserId().equals(request.getUserId())){
                 return ApiResult.errorMessage("이메일과 아이디가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+            }else{
+                FindMemberResponse response = new FindMemberResponse(
+                        findMember.getId(),
+                        findMember.getUserId(),
+                        findMember.getName(),
+                        findMember.getEmail(),
+                        null);
+
+                return ResponseEntity.ok(response);
             }
         }
-
-        return ApiResult.errorMessage("success", HttpStatus.OK);
     }
 }
