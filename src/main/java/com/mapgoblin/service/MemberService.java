@@ -68,6 +68,25 @@ public class MemberService implements UserDetailsService {
         return new CreateMemberResponse(member.getId(), member.getUserId(), member.getName(), member.getEmail());
     }
 
+    /**
+     * Modify user password
+     *
+     * @param id
+     * @param password
+     * @return
+     */
+    @Transactional
+    public Member modifyPassword(Long id, String password) {
+        Member member = memberRepository.findById(id)
+                .orElse(null);
+
+        if (member != null){
+            member.setPassword(password);
+        }
+
+        return member;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 //        return memberRepository.findByUserId(username)
