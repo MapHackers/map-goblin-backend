@@ -10,4 +10,6 @@ public class FindMemberRequest {
     private String userId;
 
     private String password;
+
+    private String email;
 }

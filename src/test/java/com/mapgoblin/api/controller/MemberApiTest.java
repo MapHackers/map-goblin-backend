@@ -54,7 +54,7 @@ class MemberApiTest {
     @Order(2)
     public void login() throws Exception {
         //given
-        FindMemberRequest request = new FindMemberRequest("gildong123", "1q2w3e4r");
+        FindMemberRequest request = new FindMemberRequest("gildong123", "1q2w3e4r", null);
 
         //when
         ResultActions actions = mockMvc.perform(post("/login")
