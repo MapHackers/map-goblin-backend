@@ -26,7 +26,7 @@ public class MemberService implements UserDetailsService {
      */
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(()->new UserNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElse(null);
     }
 
     /**
@@ -37,8 +37,21 @@ public class MemberService implements UserDetailsService {
      */
     public Member findByUserId(String userId) {
 
+//        return memberRepository.findByUserId(userId)
+//                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
+                .orElse(null);
+    }
+
+    /**
+     * Find member information with email
+     *
+     * @param email
+     * @return
+     */
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElse(null);
     }
 
     /**
@@ -57,7 +70,10 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return memberRepository.findByUserId(username)
+//                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
+
         return memberRepository.findByUserId(username)
-                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
+                .orElse(null);
     }
 }
