@@ -7,14 +7,11 @@ import com.mapgoblin.api.dto.member.JwtTokenProvider;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +32,7 @@ public class LoginApi {
 
         Member member = memberService.findByUserId(request.getUserId());
 
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+        if (member == null || !passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             return ApiResult.errorMessage("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
         }
 
@@ -82,27 +79,38 @@ public class LoginApi {
         }
     }
 
-
     /**
      * User authentication
      *
-     * @param member
+     * @param headers
      * @return
      */
     @GetMapping("/authentication")
-    public ResponseEntity<?> authentication(@AuthenticationPrincipal Member member) {
+    public ResponseEntity<?> authentication(@RequestHeader HttpHeaders headers) {
+        String token = null;
 
-        if (member == null) {
+        try{
+            token = headers.get("X-AUTH-TOKEN").get(0);
+        }catch (Exception e){
             return ApiResult.errorMessage("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
-        }else{
+        }
+
+        if (token != null && jwtTokenProvider.validateToken(token)){
+            String userId = jwtTokenProvider.getUserPk(token);
+
+            Member member = memberService.findByUserId(userId);
+
             FindMemberResponse response = new FindMemberResponse(
                     member.getId(),
                     member.getUserId(),
                     member.getName(),
                     member.getEmail(),
-                    null);
+                    token);
 
             return ResponseEntity.ok(response);
+
+        }else{
+            return ApiResult.errorMessage("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
     }
 }
