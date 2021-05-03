@@ -1,10 +1,12 @@
 package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
+import com.mapgoblin.api.dto.mail.MailDto;
 import com.mapgoblin.api.dto.member.FindMemberRequest;
 import com.mapgoblin.api.dto.member.FindMemberResponse;
 import com.mapgoblin.api.dto.member.JwtTokenProvider;
 import com.mapgoblin.domain.Member;
+import com.mapgoblin.service.MailService;
 import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.xml.ws.Response;
+import javax.servlet.http.HttpSession;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class AuthenticationApi {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
+    private final MailService mailService;
 
     /**
      * Login
@@ -117,14 +120,50 @@ public class AuthenticationApi {
     }
 
     @PostMapping("/email")
-    public ResponseEntity<?> emailAuthentication(){
+    public ResponseEntity<?> emailAuthentication(@RequestBody MailDto request, HttpSession session){
 
-        return ResponseEntity.ok("");
+        if (request.getEmail() != null){
+
+            String authNumber = getAuthNumber();
+
+            request.setTitle("[지도깨비] 이메일 인증 메일입니다.");
+            request.setContent("안녕하세요. 지도깨비입니다.\n아래의 인증번호를 화면에 입력하고 인증을 완료해주세요\n 인증번호 : " + authNumber);
+
+            session.setAttribute(request.getEmail(), authNumber);
+
+            mailService.send(request);
+        }else{
+            return ApiResult.errorMessage("이메일 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return ResponseEntity.ok("이메일에서 인증번호를 확인해주세요.");
     }
 
-    @GetMapping("/email")
-    public ResponseEntity<?> checkAuthenticationNumber(){
+    @PostMapping("/checkNumber")
+    public ResponseEntity<?> checkAuthenticationNumber(@RequestBody MailDto request, HttpSession session){
 
-        return ResponseEntity.ok("");
+        if (request.getCode() != null){
+            if (!request.getCode().equals(session.getAttribute(request.getEmail()))){
+                return ApiResult.errorMessage("잘못된 인증번호입니다.", HttpStatus.UNAUTHORIZED);
+            }
+        }else{
+            return ApiResult.errorMessage("인증번호 정보가 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        return ResponseEntity.ok("인증되었습니다.");
+    }
+
+    private String getAuthNumber(){
+        char[] charSet = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        String result = "";
+
+        int idx = 0;
+        for (int i = 0; i < 6; i++) {
+            idx = (int) (charSet.length * Math.random());
+            result += charSet[idx];
+        }
+        return result;
     }
 }
