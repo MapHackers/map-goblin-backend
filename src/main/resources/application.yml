@@ -1,0 +1,40 @@
+server:
+  address: localhost
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    url: database info
+    username: database id
+    password: database password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        # default_batch_fetch_size: 100
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # generate-ddl: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: google id
+    password: google password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    # org.hibernate.type: trace
