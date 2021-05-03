@@ -13,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.ws.Response;
+
 @RestController
 @RequiredArgsConstructor
-public class LoginApi {
+public class AuthenticationApi {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -112,5 +114,17 @@ public class LoginApi {
         }else{
             return ApiResult.errorMessage("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @PostMapping("/email")
+    public ResponseEntity<?> emailAuthentication(){
+
+        return ResponseEntity.ok("");
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<?> checkAuthenticationNumber(){
+
+        return ResponseEntity.ok("");
     }
 }
