@@ -2,6 +2,7 @@ package com.mapgoblin.service;
 
 import com.mapgoblin.api.dto.space.CreateSpaceRequest;
 import com.mapgoblin.api.dto.space.CreateSpaceResponse;
+import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Map;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.MemberSpace;
@@ -33,6 +34,19 @@ public class SpaceService {
      */
     public List<Space> findAll() {
         return spaceRepository.findAll();
+    }
+
+    /**
+     * Find one by userId, repositoryName
+     *
+     * @param userId
+     * @param repoName
+     * @return
+     */
+    public List<SpaceResponse> findOne(Long memberId, String repoName){
+
+        return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName);
+
     }
 
     /**
