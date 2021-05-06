@@ -46,27 +46,37 @@ public class SpaceService {
     public CreateSpaceResponse create(Long memberId, CreateSpaceRequest request) {
 
         Member member = memberRepository.findById(memberId).orElse(null);
-        Map map = Map.createMap();
 
-        mapRepository.save(map);
+        if(member == null) {
+            return null;
+        }
 
-        Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
+        try{
+            Map map = Map.createMap();
 
-        MemberSpace memberSpace = MemberSpace.createMemberSpace(space);
+            mapRepository.save(map);
 
-        member.addMemberSpace(memberSpace);
+            Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
 
-        memberSpaceRepository.save(memberSpace);
+            MemberSpace memberSpace = MemberSpace.createMemberSpace(space);
 
-        spaceRepository.save(space);
+            member.addMemberSpace(memberSpace);
 
-        return new CreateSpaceResponse(
-                space.getId(),
-                space.getMap().getId(),
-                space.getName(),
-                space.getThumbnail(),
-                space.getDescription(),
-                space.getLikeCount(),
-                space.getDislikeCount());
+            memberSpaceRepository.save(memberSpace);
+
+            spaceRepository.save(space);
+
+            return new CreateSpaceResponse(
+                    space.getId(),
+                    space.getMap().getId(),
+                    space.getName(),
+                    space.getThumbnail(),
+                    space.getDescription(),
+                    space.getLikeCount(),
+                    space.getDislikeCount());
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }
