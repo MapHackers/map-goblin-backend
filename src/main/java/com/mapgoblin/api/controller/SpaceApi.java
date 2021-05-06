@@ -4,6 +4,7 @@ import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.space.CreateSpaceRequest;
 import com.mapgoblin.api.dto.space.CreateSpaceResponse;
 import com.mapgoblin.api.dto.space.SpaceDto;
+import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.MemberSpace;
 import com.mapgoblin.domain.Space;
@@ -20,7 +21,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/repositories")
 @RequiredArgsConstructor
 public class SpaceApi {
 
@@ -33,8 +33,8 @@ public class SpaceApi {
      *
      * @return
      */
-    @GetMapping
-    public ResponseEntity<?> get() {
+    @GetMapping("/repositories")
+    public ResponseEntity<?> getRepositoryList() {
 
         List<Space> spaceList = spaceService.findAll();
 
@@ -45,6 +45,27 @@ public class SpaceApi {
         return ResponseEntity.ok(new ApiResult(collect));
     }
 
+    @GetMapping("/{userId}/repositories/{repositoryName}")
+    public ResponseEntity<?> getRepository(@PathVariable String userId, @PathVariable String repositoryName){
+        List<SpaceResponse> list = null;
+
+        try{
+            Member member = memberService.findByUserId(userId);
+
+            list = spaceService.findOne(member.getId(), repositoryName);
+
+            if(list != null && list.size() > 0){
+                return ResponseEntity.ok(list.get(0));
+            }else{
+                return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
+        }
+    }
+
     /**
      * Create repository
      *
@@ -52,12 +73,16 @@ public class SpaceApi {
      * @param member
      * @return
      */
-    @PostMapping
+    @PostMapping("/repositories")
     public ResponseEntity<?> create(@RequestBody CreateSpaceRequest request, @AuthenticationPrincipal Member member) {
 
         List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
 
         CreateSpaceResponse response = null;
+
+        System.out.println("////////////////////////////////////////");
+        System.out.println(request.getThumbnail());
+        System.out.println("////////////////////////////////////////");
 
         List<String> spaceNames = spacesOfMember.stream()
                 .map(memberSpace -> memberSpace.getSpace().getName())
