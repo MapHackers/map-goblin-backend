@@ -126,7 +126,7 @@ public class AuthenticationApi {
 
             String authNumber = getAuthNumber();
 
-            request.setTitle("[지도깨비] 이메일 인증 메일입니다.");
+            request.setTitle("[지도깨비] 본인확인 인증 메일입니다.");
             request.setContent("안녕하세요. 지도깨비입니다.\n아래의 인증번호를 화면에 입력하고 인증을 완료해주세요\n 인증번호 : " + authNumber);
 
             session.setAttribute(request.getEmail(), authNumber);
