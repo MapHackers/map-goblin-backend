@@ -35,6 +35,8 @@ dependencies {
     //querydsl
     implementation 'com.querydsl:querydsl-jpa'
 
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
