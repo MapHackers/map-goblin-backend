@@ -1,0 +1,26 @@
+package com.mapgoblin.service;
+
+import com.mapgoblin.domain.Member;
+import com.mapgoblin.domain.MemberSpace;
+import com.mapgoblin.repository.MemberSpaceRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class MemberSpaceService {
+
+    private final MemberSpaceRepository memberSpaceRepository;
+
+    public List<MemberSpace> findAll(){
+        return memberSpaceRepository.findAll();
+    }
+
+    public List<MemberSpace> findSpacesOfMember(Member member){
+        return memberSpaceRepository.findByMember(member).orElse(null);
+    }
+}
