@@ -44,6 +44,9 @@ public class Member extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "member")
     private List<MemberSpace> spaces = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<Alarm> alarms = new ArrayList<>();
+
     /**
      * Create Member method
      *

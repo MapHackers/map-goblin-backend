@@ -39,6 +39,9 @@ public class Space extends BaseEntity {
     @OneToMany(mappedBy = "space")
     private List<SpaceCategory> categories = new ArrayList<>();
 
+    @OneToMany(mappedBy = "space")
+    private List<Alarm> alarms = new ArrayList<>();
+
     /**
      * Create Space method
      *
