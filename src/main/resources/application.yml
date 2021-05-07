@@ -3,7 +3,7 @@ server:
   port: 8080
   servlet:
     context-path: /api
-    
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/mapgoblin
@@ -13,11 +13,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
-        # default_batch_fetch_size: 100
+        default_batch_fetch_size: 100
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     # generate-ddl: true
@@ -25,8 +25,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: google id
-    password: google password
+    username: ghdtjq2038@gmail.com
+    password: english2038!
     properties:
       mail:
         smtp:
@@ -38,3 +38,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     # org.hibernate.type: trace
+
+file:
+  upload:
+    location: src/main/resources/thumbnail
