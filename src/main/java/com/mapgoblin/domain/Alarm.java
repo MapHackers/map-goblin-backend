@@ -21,8 +21,6 @@ public class Alarm extends BaseEntity {
     @Column(name = "alarm_id")
     private Long id;
 
-    private String srcMember;
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member dstMember;
@@ -40,9 +38,10 @@ public class Alarm extends BaseEntity {
      *
      * @return
      */
-    public static Alarm createAlarm(){
+    public static Alarm createAlarm(Space space,AlarmType alarmType){
         Alarm alarm = new Alarm();
-        alarm.setSrcMember(alarm.getCreatedBy());
+        alarm.setDstSpace(space);
+        alarm.setAlarmType(alarmType);
         alarm.setRead(false);
 
         return alarm;
