@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = false)
@@ -26,13 +28,14 @@ public class LayerService {
                 .orElse(null);
     }
 
-    public Layer findByMapId(Long mapId){
+    public List<Layer> findByMapId(Long mapId){
         return layerRepository.findByMapId(mapId)
                 .orElse(null);
     }
 
-    public void save(Layer layer){
+    public void save(Map map, Layer layer){
         layerRepository.save(layer);
+        map.addLayer(layer);
     }
 
 }

@@ -6,6 +6,7 @@ import com.mapgoblin.domain.Map;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.domain.mapdata.Point;
 import com.mapgoblin.service.LayerService;
+import com.mapgoblin.service.MapDataService;
 import com.mapgoblin.service.MapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class MapApi {
 
     private final MapService mapService;
     private final LayerService layerService;
+    private final MapDataService mapdataService;
 
     /**
      * Create New MapData
@@ -46,9 +48,7 @@ public class MapApi {
             System.out.println("Layer NULLLLLL");
             System.out.println("/////////////////////////////////////////");
             Layer newLayer = Layer.createLayer(request.getLayerName());
-            layerService.save(newLayer);
-            map.addLayer(newLayer);
-            mapService.save(map);
+            layerService.save(map, newLayer);
             layer = newLayer;
         }
         switch (request.getMapDataType()){
@@ -61,7 +61,7 @@ public class MapApi {
                         request.getGeometry(),
                         request.getThumbnail()
                 );
-                layer.addMapData(point);
+                mapdataService.savePoint(layer, point);
                 break;
             default:
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -79,15 +79,21 @@ public class MapApi {
     @GetMapping("/layer")
     public ResponseEntity<?> getMapDataListByLayerId(@RequestBody CreateMapDataRequest request) {
         Map map = mapService.findByMapId(request.getMapId());
-        Layer layer = layerService.findByMapId(request.getMapId());
+        List<Layer> layerList = layerService.findByMapId(request.getMapId());
         System.out.println("---------------------------------------------------------");
         System.out.println("MAP " + map.getLayers());
         System.out.println("---------------------------------------------------------");
-        List<Layer> layerList = map.getLayers();
 //        Layer layer = layerService.findByLayerName(request.getLayerName());
 //        List<MapData> mapDataList =  layer.getMapDataList();
         System.out.println("/////////////////////////////////////////////////////////");
-        System.out.println(layer);
+        layerList.forEach(layer -> {
+            List<MapData> mapDataList = mapdataService.findByLayerId(layer.getId());
+            System.out.println("-------------------MapData------------------");
+            mapDataList.forEach(mapData -> {
+                System.out.println(mapData.getName());
+            });
+            System.out.println("--------------------------------------------");
+        });
         System.out.println("/////////////////////////////////////////////////////////");
         return new ResponseEntity<>(HttpStatus.OK);
     }
