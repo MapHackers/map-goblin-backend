@@ -29,12 +29,14 @@ public class Map extends BaseEntity {
      */
     public static Map createMap() {
         Map map = new Map();
-
         return map;
     }
 
     public void addLayer(Layer layer) {
         this.layers.add(layer);
         layer.setMap(this);
+        System.out.println("*************************************************");
+        System.out.println(this.layers);
+        System.out.println("*************************************************");
     }
 }

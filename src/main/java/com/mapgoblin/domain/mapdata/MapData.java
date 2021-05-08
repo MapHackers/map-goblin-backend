@@ -32,7 +32,9 @@ public abstract class MapData extends BaseEntity {
 
     private String description;
 
-    private int rating;
+    private Float rating;
+
+    private String thumbnail;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "layer_id")
@@ -45,4 +47,5 @@ public abstract class MapData extends BaseEntity {
         this.reviews.add(review);
         review.setMapData(this);
     }
+
 }
