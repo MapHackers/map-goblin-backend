@@ -63,6 +63,11 @@ public class Space extends BaseEntity implements Cloneable {
         return space;
     }
 
+    public void addCategory(SpaceCategory spaceCategory){
+        this.categories.add(spaceCategory);
+        spaceCategory.setSpace(this);
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Space space = (Space) super.clone();
