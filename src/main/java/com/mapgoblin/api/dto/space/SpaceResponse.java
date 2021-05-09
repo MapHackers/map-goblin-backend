@@ -5,6 +5,9 @@ import com.mapgoblin.domain.base.SourceType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class SpaceResponse {
 
@@ -29,6 +32,8 @@ public class SpaceResponse {
     private Long hostId;
 
     private String hostUserId;
+
+    private List<String> categories = new ArrayList<>();
 
     @QueryProjection
     public SpaceResponse(Long id, Long map_id, String name, String thumbnail,

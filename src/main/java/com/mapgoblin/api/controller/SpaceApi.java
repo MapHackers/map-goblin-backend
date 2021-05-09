@@ -79,6 +79,15 @@ public class SpaceApi {
             if(list != null && list.size() > 0){
                 SpaceResponse spaceResponse = list.get(0);
 
+                Space targetSpace = spaceService.findById(spaceResponse.getId());
+
+                List<String> collect = targetSpace.getCategories().stream()
+                        .map(spaceCategory -> {
+                            return spaceCategory.getCategory().getName();
+                        }).collect(Collectors.toList());
+
+                spaceResponse.setCategories(collect);
+
                 if (spaceResponse.getHostId() != null){
                     Space byId = spaceService.findById(spaceResponse.getHostId());
                     List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
