@@ -28,6 +28,11 @@ public class LayerService {
                 .orElse(null);
     }
 
+    public Layer findByLayerNameAndMapId(String layerName, Long mapId){
+        return layerRepository.findByNameAndMapId(layerName, mapId)
+                .orElse(null);
+    }
+
     public List<Layer> findByMapId(Long mapId){
         return layerRepository.findByMapId(mapId)
                 .orElse(null);
