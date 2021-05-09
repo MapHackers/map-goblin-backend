@@ -5,7 +5,9 @@ import com.mapgoblin.api.dto.space.*;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.MemberSpace;
 import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.SourceType;
+import com.mapgoblin.service.AlarmService;
 import com.mapgoblin.service.MemberService;
 import com.mapgoblin.service.MemberSpaceService;
 import com.mapgoblin.service.SpaceService;
@@ -25,6 +27,7 @@ public class SpaceApi {
     private final MemberService memberService;
     private final MemberSpaceService memberSpaceService;
     private final SpaceService spaceService;
+    private final AlarmService alarmService;
 
     /**
      * Get all repositories
@@ -38,6 +41,19 @@ public class SpaceApi {
 
         List<SpaceDto> collect = spaceList.stream()
                 .map(space -> new SpaceDto(space))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ApiResult(collect));
+    }
+
+    @GetMapping("{userId}/repositories")
+    public ResponseEntity<?> getMyRepositoryList(@PathVariable String userId){
+        Member findMember = memberService.findByUserId(userId);
+
+        List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(findMember);
+
+        List<SpaceDto> collect = spacesOfMember.stream()
+                .map(memberSpace -> new SpaceDto(memberSpace.getSpace()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new ApiResult(collect));
@@ -142,6 +158,8 @@ public class SpaceApi {
             }
 
             response = spaceService.clone(member.getId(), hostSpace);
+
+            alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
 
             if(response == null){
                 return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
