@@ -1,5 +1,6 @@
 package com.mapgoblin.api.dto.space;
 
+import com.mapgoblin.domain.base.SourceType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 
@@ -19,6 +20,8 @@ public class SpaceResponse {
     private int likeCount;
 
     private int dislikeCount;
+
+    private SourceType source;
 
     @QueryProjection
     public SpaceResponse(Long id, Long map_id, String name, String thumbnail,

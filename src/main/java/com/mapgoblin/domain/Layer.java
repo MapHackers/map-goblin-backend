@@ -17,7 +17,7 @@ import static javax.persistence.FetchType.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Layer extends BaseEntity {
+public class Layer extends BaseEntity implements Cloneable {
 
     @Id
     @GeneratedValue
@@ -49,5 +49,35 @@ public class Layer extends BaseEntity {
     public void addMapData(MapData mapData) {
         this.mapDataList.add(mapData);
         mapData.setLayer(this);
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Layer layer = (Layer) super.clone();
+        layer.id = null;
+        layer.map = null;
+        layer.mapDataList = mapDataListCopy(mapDataList, layer);
+
+        return layer;
+    }
+
+    private List<MapData> mapDataListCopy(List<MapData> list, Layer layer){
+        List<MapData> result = new ArrayList<MapData>();
+
+        list.forEach(mapData -> {
+
+        });
+        for (MapData mapData : list) {
+            System.out.println(mapData.getClass());
+            try{
+                MapData clone = (MapData) mapData.clone();
+                clone.setLayer(layer);
+                result.add(clone);
+            }catch (CloneNotSupportedException e){
+                e.printStackTrace();
+            }
+        }
+
+        return result;
     }
 }

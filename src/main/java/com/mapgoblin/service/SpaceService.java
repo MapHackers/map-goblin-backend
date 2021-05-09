@@ -3,14 +3,8 @@ package com.mapgoblin.service;
 import com.mapgoblin.api.dto.space.CreateSpaceRequest;
 import com.mapgoblin.api.dto.space.CreateSpaceResponse;
 import com.mapgoblin.api.dto.space.SpaceResponse;
-import com.mapgoblin.domain.Map;
-import com.mapgoblin.domain.Member;
-import com.mapgoblin.domain.MemberSpace;
-import com.mapgoblin.domain.Space;
-import com.mapgoblin.repository.MapRepository;
-import com.mapgoblin.repository.MemberRepository;
-import com.mapgoblin.repository.MemberSpaceRepository;
-import com.mapgoblin.repository.SpaceRepository;
+import com.mapgoblin.domain.*;
+import com.mapgoblin.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +20,11 @@ public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final MapRepository mapRepository;
     private final MemberSpaceRepository memberSpaceRepository;
+    private final LayerRepository layerRepository;
+    private final MapDataRepository mapDataRepository;
+    private final ReviewRepository reviewRepository;
+    private final CategoryRepository categoryRepository;
+    private final SpaceCategoryRepository spaceCategoryRepository;
 
     /**
      * Find all repositories
@@ -39,7 +38,7 @@ public class SpaceService {
     /**
      * Find one by userId, repositoryName
      *
-     * @param userId
+     * @param memberId
      * @param repoName
      * @return
      */
@@ -47,6 +46,10 @@ public class SpaceService {
 
         return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName);
 
+    }
+
+    public Space findById(Long spaceId){
+        return spaceRepository.findById(spaceId).orElse(null);
     }
 
     /**
@@ -72,13 +75,13 @@ public class SpaceService {
 
             Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
 
+            spaceRepository.save(space);
+
             MemberSpace memberSpace = MemberSpace.createMemberSpace(space);
 
             member.addMemberSpace(memberSpace);
 
             memberSpaceRepository.save(memberSpace);
-
-            spaceRepository.save(space);
 
             return new CreateSpaceResponse(
                     space.getId(),
@@ -88,6 +91,69 @@ public class SpaceService {
                     space.getDescription(),
                     space.getLikeCount(),
                     space.getDislikeCount());
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Transactional
+    public CreateSpaceResponse clone(Long memberId, Space hostSpace) {
+
+        Member member = memberRepository.findById(memberId).orElse(null);
+
+        if(member == null) {
+            return null;
+        }
+
+        try{
+            Space copySpace = (Space) hostSpace.clone();
+
+            copySpace.setHost(hostSpace);
+
+            Map copyMap = copySpace.getMap();
+
+            System.out.println("//////////////////////////");
+            System.out.println(copyMap.getLayers().size());
+            System.out.println("//////////////////////////");
+            
+            mapRepository.save(copyMap);
+
+            copyMap.getLayers().forEach(layer -> {
+                layerRepository.save(layer);
+
+                layer.getMapDataList().forEach(mapData -> {
+                    mapDataRepository.save(mapData);
+
+                    mapData.getReviews().forEach(review -> {
+                        reviewRepository.save(review);
+                    });
+                });
+            });
+
+            copySpace.getCategories().forEach(spaceCategory -> {
+                categoryRepository.save(spaceCategory.getCategory());
+
+                spaceCategoryRepository.save(spaceCategory);
+            });
+
+            spaceRepository.save(copySpace);
+
+            MemberSpace memberSpace = MemberSpace.cloneMemberSpace(copySpace);
+
+            member.addMemberSpace(memberSpace);
+
+            memberSpaceRepository.save(memberSpace);
+
+            return new CreateSpaceResponse(
+                    copySpace.getId(),
+                    copySpace.getMap().getId(),
+                    copySpace.getName(),
+                    copySpace.getThumbnail(),
+                    copySpace.getDescription(),
+                    copySpace.getLikeCount(),
+                    copySpace.getDislikeCount());
+
         }catch (Exception e){
             e.printStackTrace();
             return null;

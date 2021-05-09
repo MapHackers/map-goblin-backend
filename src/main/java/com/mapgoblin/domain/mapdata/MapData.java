@@ -22,7 +22,7 @@ import static javax.persistence.InheritanceType.JOINED;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class MapData extends BaseEntity {
+public abstract class MapData extends BaseEntity implements Cloneable {
 
     @Id @GeneratedValue
     @Column(name = "map_data_id")
@@ -48,4 +48,28 @@ public abstract class MapData extends BaseEntity {
         review.setMapData(this);
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        MapData mapData = (MapData) super.clone();
+        mapData.id = null;
+        mapData.layer = null;
+        mapData.reviews = reviewListCopy(reviews, mapData);
+
+        return mapData;
+    }
+
+    private List<Review> reviewListCopy(List<Review> list, MapData mapData){
+        List<Review> result = new ArrayList<Review>();
+        for (Review review : list) {
+            try{
+                Review clone = (Review) review.clone();
+                clone.setMapData(mapData);
+                result.add(clone);
+            }catch (CloneNotSupportedException e){
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
 }
