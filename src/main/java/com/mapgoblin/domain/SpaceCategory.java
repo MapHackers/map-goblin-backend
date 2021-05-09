@@ -2,6 +2,7 @@ package com.mapgoblin.domain;
 
 import com.mapgoblin.domain.base.BaseEntity;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -9,7 +10,8 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
-public class SpaceCategory extends BaseEntity {
+@Setter
+public class SpaceCategory extends BaseEntity implements Cloneable {
 
     @Id
     @GeneratedValue
@@ -23,4 +25,14 @@ public class SpaceCategory extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        SpaceCategory spaceCategory = (SpaceCategory) super.clone();
+        spaceCategory.id = null;
+        spaceCategory.space = null;
+        spaceCategory.category = (Category) category.clone();
+
+        return spaceCategory;
+    }
 }

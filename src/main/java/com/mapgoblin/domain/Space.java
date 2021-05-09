@@ -16,7 +16,7 @@ import static javax.persistence.FetchType.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Space extends BaseEntity {
+public class Space extends BaseEntity implements Cloneable {
 
     @Id @GeneratedValue
     @Column(name = "space_id")
@@ -39,6 +39,10 @@ public class Space extends BaseEntity {
     @OneToMany(mappedBy = "space")
     private List<SpaceCategory> categories = new ArrayList<>();
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "host_id")
+    private Space host;
+
     /**
      * Create Space method
      *
@@ -57,5 +61,30 @@ public class Space extends BaseEntity {
         space.setDislikeCount(0);
 
         return space;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Space space = (Space) super.clone();
+        space.id = null;
+        space.map = (Map)map.clone();
+        space.categories = categoryListCopy(categories, space);
+
+        return space;
+    }
+
+    private List<SpaceCategory> categoryListCopy(List<SpaceCategory> list, Space space){
+        List<SpaceCategory> result = new ArrayList<SpaceCategory>();
+        for (SpaceCategory spaceCategory : list) {
+            try{
+                SpaceCategory clone = (SpaceCategory) spaceCategory.clone();
+                clone.setSpace(space);
+                result.add(clone);
+            }catch (CloneNotSupportedException e){
+                e.printStackTrace();
+            }
+        }
+
+        return result;
     }
 }

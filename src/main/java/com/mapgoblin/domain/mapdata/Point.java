@@ -10,6 +10,7 @@ import javax.persistence.*;
 import static javax.persistence.FetchType.*;
 
 @Entity
+@DiscriminatorValue("POINT")
 @Getter
 @Setter
 public class Point extends MapData {
@@ -36,6 +37,14 @@ public class Point extends MapData {
         point.setGeometry(geometry);
         point.setThumbnail(thumbnail);
         // marker를 설정해주어야 하나? 클라이언트에서 요청할때 어떤 이미지를 가지고 만들건지 정해서 보내주면 될 듯?
+        return point;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Point point = (Point) super.clone();
+        point.marker = null;
+
         return point;
     }
 }

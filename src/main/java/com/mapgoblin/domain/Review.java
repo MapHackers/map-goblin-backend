@@ -15,7 +15,7 @@ import static javax.persistence.FetchType.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Review extends BaseEntity {
+public class Review extends BaseEntity implements Cloneable {
 
     @Id
     @GeneratedValue
@@ -33,4 +33,13 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "map_data_id")
     private MapData mapData;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Review review = (Review) super.clone();
+        review.id = null;
+        review.mapData = null;
+
+        return review;
+    }
 }
