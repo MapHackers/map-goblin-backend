@@ -21,14 +21,20 @@ public class AuditingConfig {
      */
     @Bean
     public AuditorAware<String> auditorProvider() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (null == authentication || !authentication.isAuthenticated()) {
-            return null;
-        }
+        return new AuditorAware<String>() {
+            @Override
+            public Optional<String> getCurrentAuditor() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Member member = (Member) authentication.getPrincipal();
+                if (null == authentication || !authentication.isAuthenticated()) {
+                    return null;
+                }
 
-        return () -> Optional.of(member.getUserId());
+                Member member = (Member) authentication.getPrincipal();
+
+                return Optional.of(member.getUserId());
+            }
+        };
     }
 }
