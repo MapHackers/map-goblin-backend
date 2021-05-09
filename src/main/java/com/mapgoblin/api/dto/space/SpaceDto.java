@@ -27,6 +27,8 @@ public class SpaceDto {
 
     private int dislikeCount;
 
+    private String ownerId;
+
     private List<SpaceCategoryDto> categories;
 
     public SpaceDto(Space space) {

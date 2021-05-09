@@ -40,7 +40,15 @@ public class SpaceApi {
         List<Space> spaceList = spaceService.findAll();
 
         List<SpaceDto> collect = spaceList.stream()
-                .map(space -> new SpaceDto(space))
+                .map(space -> {
+                    List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
+
+                    SpaceDto spaceDto = new SpaceDto(space);
+
+                    spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
+
+                    return spaceDto;
+                })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new ApiResult(collect));
