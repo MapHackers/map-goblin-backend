@@ -1,6 +1,8 @@
 package com.mapgoblin.api.controller;
 
+import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.map.CreateMapDataRequest;
+import com.mapgoblin.api.dto.map.LayerDto;
 import com.mapgoblin.domain.Layer;
 import com.mapgoblin.domain.Map;
 import com.mapgoblin.domain.mapdata.MapData;
@@ -8,12 +10,14 @@ import com.mapgoblin.domain.mapdata.Point;
 import com.mapgoblin.service.LayerService;
 import com.mapgoblin.service.MapDataService;
 import com.mapgoblin.service.MapService;
+import com.mapgoblin.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/mapdata")
@@ -23,6 +27,7 @@ public class MapApi {
     private final MapService mapService;
     private final LayerService layerService;
     private final MapDataService mapdataService;
+    private final PointService pointService;
 
     /**
      * Create New MapData
@@ -34,7 +39,8 @@ public class MapApi {
     public ResponseEntity<?> create(@RequestBody CreateMapDataRequest request) {
 
         Map map = mapService.findByMapId(request.getMapId());
-        Layer layer = layerService.findByLayerName(request.getLayerName());
+        Layer layer = layerService.findByLayerNameAndMapId(request.getLayerName(), request.getMapId());
+
 
         if (map == null){
             // 요청해온 map id 가 유효하지 않을경우 오류
@@ -71,30 +77,51 @@ public class MapApi {
     }
 
     /**
-     * Get MapData Layer
+     * Delete MapData
      *
      * @param request
      * @return
      */
-    @GetMapping("/layer")
-    public ResponseEntity<?> getMapDataListByLayerId(@RequestBody CreateMapDataRequest request) {
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(@RequestBody CreateMapDataRequest request){
+
         Map map = mapService.findByMapId(request.getMapId());
-        List<Layer> layerList = layerService.findByMapId(request.getMapId());
+        Layer layer = layerService.findByLayerNameAndMapId(request.getLayerName(), request.getMapId());
+
+        if (map == null || layer == null){
+            // 지우는 요청이 유호하지 않은 맵 또는 레이어의 데이터일때
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if(request.getMapDataType().equals("point")){
+            Point point = pointService.findByGeometry(request.getGeometry());
+            pointService.delete(point);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    /**
+     * Get MapData Layer
+     *
+     * @param
+     * @return
+     */
+    @GetMapping("/{mapId}")
+    public ResponseEntity<?> getMapDataListByLayerId(@PathVariable Long mapId) {
+        Map map = mapService.findByMapId(mapId);
+        List<Layer> layerList = layerService.findByMapId(mapId);
         System.out.println("---------------------------------------------------------");
         System.out.println("MAP " + map.getLayers());
         System.out.println("---------------------------------------------------------");
 //        Layer layer = layerService.findByLayerName(request.getLayerName());
 //        List<MapData> mapDataList =  layer.getMapDataList();
         System.out.println("/////////////////////////////////////////////////////////");
-        layerList.forEach(layer -> {
-            List<MapData> mapDataList = mapdataService.findByLayerId(layer.getId());
-            System.out.println("-------------------MapData------------------");
-            mapDataList.forEach(mapData -> {
-                System.out.println(mapData.getName());
-            });
-            System.out.println("--------------------------------------------");
-        });
+
+        List<LayerDto> collect = layerList.stream()
+                .map(layer -> new LayerDto(layer))
+                .collect(Collectors.toList());
+
         System.out.println("/////////////////////////////////////////////////////////");
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(new ApiResult(collect));
     }
 }

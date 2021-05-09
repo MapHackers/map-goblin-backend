@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface LayerRepository extends JpaRepository<Layer, Long> {
 
     Optional<Layer> findByName(String layerName);
+    Optional<Layer> findByNameAndMapId(String layerNAme, Long mapId);
     Optional<List<Layer>> findByMapId(Long mapId);
+
 
 }
