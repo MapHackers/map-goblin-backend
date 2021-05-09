@@ -1,5 +1,6 @@
 package com.mapgoblin.api.dto.alarm;
 
+import com.mapgoblin.domain.Alarm;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.AlarmType;
@@ -27,4 +28,13 @@ public class AlarmResponse {
     private String spaceName;
 
     private boolean isRead;
+
+    public AlarmResponse(Alarm alarm){
+        this.id = alarm.getId();
+        this.dstMemberName = alarm.getDstMember().getName();
+        this.srcMemberName = alarm.getCreatedBy();
+        this.alarmType = alarm.getAlarmType();
+        this.spaceName = alarm.getDstSpace().getName();
+        this.isRead = alarm.isRead();
+    }
 }

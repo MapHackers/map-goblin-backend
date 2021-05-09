@@ -20,6 +20,8 @@ public class MemberApi {
     private final PasswordEncoder passwordEncoder;
     private final MemberService memberService;
 
+
+
     /**
      * Sign Up
      *
