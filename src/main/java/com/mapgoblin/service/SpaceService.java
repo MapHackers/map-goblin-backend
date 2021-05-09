@@ -84,11 +84,27 @@ public class SpaceService {
         }
 
         try{
+
             Map map = Map.createMap();
 
             mapRepository.save(map);
 
             Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
+
+            for (String category : request.getCategories()) {
+
+                SpaceCategory spaceCategory = new SpaceCategory();
+
+                Category myCategory = Category.createCategory(category);
+
+                categoryRepository.save(myCategory);
+
+                myCategory.addSpaceCategory(spaceCategory);
+
+                space.addCategory(spaceCategory);
+
+                spaceCategoryRepository.save(spaceCategory);
+            }
 
             spaceRepository.save(space);
 

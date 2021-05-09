@@ -2,6 +2,7 @@ package com.mapgoblin.domain;
 
 import com.mapgoblin.domain.base.BaseEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class SpaceCategory extends BaseEntity implements Cloneable {
 
     @Id

@@ -119,10 +119,6 @@ public class SpaceApi {
 
         CreateSpaceResponse response = null;
 
-        System.out.println("////////////////////////////////////////");
-        System.out.println(request.getThumbnail());
-        System.out.println("////////////////////////////////////////");
-
         List<String> spaceNames = spacesOfMember.stream()
                 .map(memberSpace -> memberSpace.getSpace().getName())
                 .collect(Collectors.toList());
