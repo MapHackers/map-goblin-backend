@@ -44,7 +44,26 @@ public class AlarmService {
      */
     public List<Alarm> findAlarmsByMemberId(String memberId){
         Member member = memberRepository.findByUserId(memberId).orElse(null);
-        return alarmRepository.findByDstMember(member).orElse(null);
+        return alarmRepository.findByDstMemberOrderByCreatedDateDesc(member).orElse(null);
+    }
+
+    /**
+     *
+     * @param alarmId
+     * @return
+     */
+    @Transactional
+    public boolean setAlarmRead(Long alarmId){
+        Alarm alarm = alarmRepository.findById(alarmId).orElse(null);
+
+        if (alarm == null){
+            return false;
+        }
+        else{
+            alarm.setRead(true);
+            return true;
+        }
+
     }
 
     /**

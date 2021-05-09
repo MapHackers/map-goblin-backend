@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
-    Optional<List<Alarm>> findByDstMember(Member member);
+    Optional<List<Alarm>> findByDstMemberOrderByCreatedDateDesc(Member member);
 }
