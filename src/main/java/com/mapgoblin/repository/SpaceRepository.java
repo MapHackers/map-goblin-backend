@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface SpaceRepository extends JpaRepository<Space, Long> {
 
+    Optional<Space> findByHost(Space space);
 }

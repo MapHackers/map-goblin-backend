@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.mapgoblin.domain.QMemberSpace.memberSpace;
 import static com.mapgoblin.domain.QSpace.space;
+import static com.mapgoblin.domain.QMember.member;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 public class MemberSpaceRepositoryImpl implements MemberSpaceRepositoryCustom {
@@ -33,11 +34,33 @@ public class MemberSpaceRepositoryImpl implements MemberSpaceRepositoryCustom {
                         space.thumbnail,
                         space.description,
                         space.likeCount,
-                        space.dislikeCount))
+                        space.dislikeCount,
+                        memberSpace.source,
+                        space.host.id))
                 .from(memberSpace)
                 .leftJoin(memberSpace.space, space)
                 .where(memberIdEq(memberId),
                         spaceNameEq(spaceName))
+                .fetch();
+    }
+
+    @Override
+    public List<SpaceResponse> findByMemberIdAndHostId(Long memberId, Long hostId) {
+        return queryFactory
+                .select(new QSpaceResponse(
+                        space.id,
+                        space.map.id,
+                        space.name,
+                        space.thumbnail,
+                        space.description,
+                        space.likeCount,
+                        space.dislikeCount,
+                        memberSpace.source,
+                        space.host.id))
+                .from(memberSpace)
+                .leftJoin(memberSpace.space, space)
+                .where(memberIdEq(memberId),
+                        hostIdEq(hostId))
                 .fetch();
     }
 
@@ -47,5 +70,9 @@ public class MemberSpaceRepositoryImpl implements MemberSpaceRepositoryCustom {
 
     private BooleanExpression spaceNameEq(String spaceName) {
         return isEmpty(spaceName) ? null : space.name.eq(spaceName);
+    }
+
+    private BooleanExpression hostIdEq(Long hostId) {
+        return isEmpty(hostId) ? null : space.host.id.eq(hostId);
     }
 }
