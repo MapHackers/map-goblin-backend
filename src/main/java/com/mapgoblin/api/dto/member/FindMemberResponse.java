@@ -15,5 +15,7 @@ public class FindMemberResponse {
 
     private String email;
 
+    private String description;
+
     private String token;
 }

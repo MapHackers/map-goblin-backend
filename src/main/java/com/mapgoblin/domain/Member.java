@@ -34,6 +34,8 @@ public class Member extends BaseEntity implements UserDetails {
 
     private String password;
 
+    private String description;
+
     private int reward;
 
     private int recode;

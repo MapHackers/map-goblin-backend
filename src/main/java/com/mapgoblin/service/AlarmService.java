@@ -7,6 +7,7 @@ import com.mapgoblin.domain.MemberSpace;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.repository.AlarmRepository;
+import com.mapgoblin.repository.MemberRepository;
 import com.mapgoblin.repository.MemberSpaceRepository;
 import com.mapgoblin.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,46 @@ public class AlarmService {
     private final SpaceRepository spaceRepository;
     private final MemberSpaceRepository memberSpaceRepository;
     private final AlarmRepository alarmRepository;
+    private final MemberRepository memberRepository;
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     public Space findSpaceById(Long id){
         return spaceRepository.findById(id).orElse(null);
     }
 
-    public List<Alarm> findAll(){ return alarmRepository.findAll(); }
+    /**
+     *
+     * @param memberId
+     * @return
+     */
+    public List<Alarm> findAlarmsByMemberId(String memberId){
+        Member member = memberRepository.findByUserId(memberId).orElse(null);
+        return alarmRepository.findByDstMemberOrderByCreatedDateDesc(member).orElse(null);
+    }
+
+    /**
+     *
+     * @param alarmId
+     * @return
+     */
+    @Transactional
+    public boolean setAlarmRead(Long alarmId){
+        Alarm alarm = alarmRepository.findById(alarmId).orElse(null);
+
+        if (alarm == null){
+            return false;
+        }
+        else{
+            alarm.setRead(true);
+            return true;
+        }
+
+    }
+
     /**
      *
      * @param space
@@ -45,20 +80,7 @@ public class AlarmService {
             members.add(memberSpace.getMember());
         });
 
-//        List<Member> memberList = memberSpaces.stream()
-//                .map(memberSpace -> memberSpace.getMember())
-//                .collect(Collectors.toList());
-
         return members;
-    }
-
-    /**
-     *
-     * @param alarm
-     */
-    @Transactional
-    public void saveTest(Alarm alarm){
-        alarmRepository.save(alarm);
     }
 
     /**
