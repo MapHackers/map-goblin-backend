@@ -91,19 +91,21 @@ public class SpaceService {
 
             Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
 
-            for (String category : request.getCategories()) {
+            if(request.getCategories() != null){
+                for (String category : request.getCategories()) {
 
-                SpaceCategory spaceCategory = new SpaceCategory();
+                    SpaceCategory spaceCategory = new SpaceCategory();
 
-                Category myCategory = Category.createCategory(category);
+                    Category myCategory = Category.createCategory(category);
 
-                categoryRepository.save(myCategory);
+                    categoryRepository.save(myCategory);
 
-                myCategory.addSpaceCategory(spaceCategory);
+                    myCategory.addSpaceCategory(spaceCategory);
 
-                space.addCategory(spaceCategory);
+                    space.addCategory(spaceCategory);
 
-                spaceCategoryRepository.save(spaceCategory);
+                    spaceCategoryRepository.save(spaceCategory);
+                }
             }
 
             spaceRepository.save(space);
