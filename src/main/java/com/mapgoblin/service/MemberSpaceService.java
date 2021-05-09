@@ -2,6 +2,7 @@ package com.mapgoblin.service;
 
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.MemberSpace;
+import com.mapgoblin.domain.Space;
 import com.mapgoblin.repository.MemberSpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,4 +24,9 @@ public class MemberSpaceService {
     public List<MemberSpace> findSpacesOfMember(Member member){
         return memberSpaceRepository.findByMember(member).orElse(null);
     }
+
+    public List<MemberSpace> findBySpace(Space space){
+        return memberSpaceRepository.findBySpace(space).orElse(null);
+    }
+
 }

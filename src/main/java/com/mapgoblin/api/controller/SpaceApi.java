@@ -55,10 +55,19 @@ public class SpaceApi {
             if(list != null && list.size() > 0){
                 SpaceResponse spaceResponse = list.get(0);
 
+                if (spaceResponse.getHostId() != null){
+                    Space byId = spaceService.findById(spaceResponse.getHostId());
+                    List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
+
+                    String hostUserId = bySpace.get(0).getMember().getUserId();
+
+                    spaceResponse.setHostUserId(hostUserId);
+                }
+
                 if(findMember.getId().equals(member.getId())){
-                    spaceResponse.setSource(SourceType.HOST);
+                    spaceResponse.setAuthority("OWNER");
                 }else{
-                    spaceResponse.setSource(SourceType.CLONE);
+                    spaceResponse.setAuthority("VIEWER");
                 }
 
                 return ResponseEntity.ok(spaceResponse);
@@ -121,10 +130,22 @@ public class SpaceApi {
 
         try{
             Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
+
             if (hostSpace == null){
                 return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
             }
+
+            List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), cloneRequest.getRepositoryId());
+
+            if (byMemberIdAndHostId.size() > 0){
+                return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
+            }
+
             response = spaceService.clone(member.getId(), hostSpace);
+
+            if(response == null){
+                return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
+            }
         }catch (Exception e){
             e.printStackTrace();
             return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);

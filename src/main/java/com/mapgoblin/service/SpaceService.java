@@ -48,8 +48,23 @@ public class SpaceService {
 
     }
 
+    /**
+     *
+     * @param spaceId
+     * @return
+     */
     public Space findById(Long spaceId){
         return spaceRepository.findById(spaceId).orElse(null);
+    }
+
+    /**
+     *
+     * @param memberId
+     * @param hostId
+     * @return
+     */
+    public List<SpaceResponse> findByMemberIdAndHostId(Long memberId, Long hostId){
+        return memberSpaceRepository.findByMemberIdAndHostId(memberId, hostId);
     }
 
     /**
@@ -116,7 +131,7 @@ public class SpaceService {
             System.out.println("//////////////////////////");
             System.out.println(copyMap.getLayers().size());
             System.out.println("//////////////////////////");
-            
+
             mapRepository.save(copyMap);
 
             copyMap.getLayers().forEach(layer -> {
@@ -158,5 +173,9 @@ public class SpaceService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public Space findByHost(Space space){
+        return spaceRepository.findByHost(space).orElse(null);
     }
 }
