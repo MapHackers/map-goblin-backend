@@ -25,13 +25,18 @@ public class AuditingConfig {
         return new AuditorAware<String>() {
             @Override
             public Optional<String> getCurrentAuditor() {
+                Member member = null;
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-                if (null == authentication || !authentication.isAuthenticated()) {
-                    return null;
+                if (!authentication.isAuthenticated()) {
+                    return Optional.empty();
                 }
 
-                Member member = (Member) authentication.getPrincipal();
+                try{
+                    member = (Member) authentication.getPrincipal();
+                }catch (Exception e){
+                    return Optional.empty();
+                }
 
                 return Optional.of(member.getUserId());
             }
