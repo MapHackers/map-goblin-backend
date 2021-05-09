@@ -65,7 +65,7 @@ public class MemberService implements UserDetailsService {
 
         memberRepository.save(member);
 
-        return new CreateMemberResponse(member.getId(), member.getUserId(), member.getName(), member.getEmail());
+        return new CreateMemberResponse(member.getId(), member.getUserId(), member.getName(), member.getEmail(), member.getDescription());
     }
 
     /**

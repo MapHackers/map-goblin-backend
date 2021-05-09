@@ -15,4 +15,6 @@ public class CreateMemberResponse {
 
     private String email;
 
+    private String description;
+
 }
