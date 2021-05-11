@@ -49,8 +49,10 @@ public class Category extends BaseEntity implements Cloneable {
     protected Object clone() throws CloneNotSupportedException {
         Category category = (Category) super.clone();
         category.id = null;
-        category.parent = (Category) parent.clone();
-        category.child = childListCopy(child);
+//        category.parent = (Category) parent.clone();
+//        category.child = childListCopy(child);
+        category.parent = null;
+        category.child = null;
         category.spaces = null;
 
         return category;
