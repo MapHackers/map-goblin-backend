@@ -49,6 +49,9 @@ public class Member extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "dstMember")
     private List<Alarm> alarms = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<Likes> likes = new ArrayList<>();
+
     /**
      * Create Member method
      *
@@ -79,6 +82,11 @@ public class Member extends BaseEntity implements UserDetails {
     public void addAlarm(Alarm alarm) {
         alarms.add(alarm);
         alarm.setDstMember(this);
+    }
+
+    public void addLikes(Likes like){
+        likes.add(like);
+        like.setMember(this);
     }
 
     @Override
