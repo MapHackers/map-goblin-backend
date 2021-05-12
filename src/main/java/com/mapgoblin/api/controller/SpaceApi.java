@@ -2,15 +2,13 @@ package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.space.*;
+import com.mapgoblin.domain.Likes;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.MemberSpace;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.SourceType;
-import com.mapgoblin.service.AlarmService;
-import com.mapgoblin.service.MemberService;
-import com.mapgoblin.service.MemberSpaceService;
-import com.mapgoblin.service.SpaceService;
+import com.mapgoblin.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +26,7 @@ public class SpaceApi {
     private final MemberSpaceService memberSpaceService;
     private final SpaceService spaceService;
     private final AlarmService alarmService;
+    private final LikeService likeService;
 
     /**
      * Get all repositories
@@ -35,7 +34,7 @@ public class SpaceApi {
      * @return
      */
     @GetMapping("/repositories")
-    public ResponseEntity<?> getRepositoryList() {
+    public ResponseEntity<?> getRepositoryList(@AuthenticationPrincipal Member member) {
 
         List<Space> spaceList = spaceService.findAll();
 
@@ -46,6 +45,14 @@ public class SpaceApi {
                     SpaceDto spaceDto = new SpaceDto(space);
 
                     spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
+
+                    Likes alreadyLike = likeService.isAlreadyLike(member, space);
+
+                    if(alreadyLike == null){
+                        spaceDto.setLikeType(null);
+                    }else{
+                        spaceDto.setLikeType(alreadyLike.getType());
+                    }
 
                     return spaceDto;
                 })
@@ -61,7 +68,21 @@ public class SpaceApi {
         List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(findMember);
 
         List<SpaceDto> collect = spacesOfMember.stream()
-                .map(memberSpace -> new SpaceDto(memberSpace.getSpace()))
+                .map(memberSpace -> {
+                    Space space = memberSpace.getSpace();
+
+                    SpaceDto spaceDto = new SpaceDto(memberSpace.getSpace());
+
+                    Likes alreadyLike = likeService.isAlreadyLike(findMember, space);
+
+                    if(alreadyLike == null){
+                        spaceDto.setLikeType(null);
+                    }else{
+                        spaceDto.setLikeType(alreadyLike.getType());
+                    }
+
+                    return spaceDto;
+                })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new ApiResult(collect));
@@ -87,6 +108,14 @@ public class SpaceApi {
                         }).collect(Collectors.toList());
 
                 spaceResponse.setCategories(collect);
+
+                Likes alreadyLike = likeService.isAlreadyLike(member, targetSpace);
+
+                if(alreadyLike == null){
+                    spaceResponse.setLikeType(null);
+                }else{
+                    spaceResponse.setLikeType(alreadyLike.getType());
+                }
 
                 if (spaceResponse.getHostId() != null){
                     Space byId = spaceService.findById(spaceResponse.getHostId());
