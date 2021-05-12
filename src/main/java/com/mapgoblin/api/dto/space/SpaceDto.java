@@ -3,6 +3,7 @@ package com.mapgoblin.api.dto.space;
 import com.mapgoblin.domain.Map;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.SpaceCategory;
+import com.mapgoblin.domain.base.LikeType;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -30,6 +31,8 @@ public class SpaceDto {
     private String ownerId;
 
     private List<SpaceCategoryDto> categories;
+
+    private LikeType likeType;
 
     public SpaceDto(Space space) {
         this.id = space.getId();

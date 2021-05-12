@@ -1,6 +1,7 @@
 package com.mapgoblin.api.dto.space;
 
 import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.base.LikeType;
 import com.mapgoblin.domain.base.SourceType;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
@@ -34,6 +35,8 @@ public class SpaceResponse {
     private String hostUserId;
 
     private List<String> categories = new ArrayList<>();
+
+    private LikeType likeType;
 
     @QueryProjection
     public SpaceResponse(Long id, Long map_id, String name, String thumbnail,

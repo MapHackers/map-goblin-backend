@@ -43,6 +43,9 @@ public class Space extends BaseEntity implements Cloneable {
     @JoinColumn(name = "host_id")
     private Space host;
 
+    @OneToMany(mappedBy = "space")
+    private List<Likes> likes = new ArrayList<>();
+
     /**
      * Create Space method
      *
@@ -68,12 +71,18 @@ public class Space extends BaseEntity implements Cloneable {
         spaceCategory.setSpace(this);
     }
 
+    public void addLikes(Likes like){
+        likes.add(like);
+        like.setSpace(this);
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Space space = (Space) super.clone();
         space.id = null;
         space.map = (Map)map.clone();
         space.categories = categoryListCopy(categories, space);
+        space.likes = null;
 
         return space;
     }
