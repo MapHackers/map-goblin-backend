@@ -213,4 +213,13 @@ public class SpaceApi {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/repositories/{id}/delete")
+    public ResponseEntity<?> repositoryDelete(@PathVariable Long id){
+        Space findSpace = spaceService.findById(id);
+
+        spaceService.delete(findSpace);
+
+        return ResponseEntity.ok("");
+    }
 }

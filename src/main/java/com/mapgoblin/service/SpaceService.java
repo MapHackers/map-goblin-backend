@@ -196,4 +196,8 @@ public class SpaceService {
     public Space findByHost(Space space){
         return spaceRepository.findByHost(space).orElse(null);
     }
+
+    public void delete(Space space){
+        spaceRepository.delete(space);
+    }
 }
