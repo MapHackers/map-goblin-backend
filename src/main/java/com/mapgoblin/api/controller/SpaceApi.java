@@ -213,4 +213,32 @@ public class SpaceApi {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/repositories/{id}/delete")
+    public ResponseEntity<?> repositoryDelete(@PathVariable Long id,  @AuthenticationPrincipal Member member){
+        Space findSpace = spaceService.findById(id);
+        Boolean checkHost = false;
+
+        if (findSpace == null) {
+            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
+        }
+
+        List<MemberSpace> findMemberSpace = memberSpaceService.findBySpace(findSpace);
+
+        for (MemberSpace memberSpace : findMemberSpace) {
+            if(memberSpace.getMember().getId().equals(member.getId())){
+                checkHost = true;
+
+                break;
+            }
+        }
+
+        if(!checkHost){
+            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
+        }
+
+        spaceService.delete(findSpace);
+
+        return ResponseEntity.ok(checkHost);
+    }
 }
