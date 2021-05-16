@@ -47,6 +47,7 @@ public class AuthenticationApi {
                 member.getName(),
                 member.getEmail(),
                 member.getDescription(),
+                member.getProfile(),
                 jwtTokenProvider.createToken(member.getUserId(), member.getRole()));
 
         return ResponseEntity.ok(response);
@@ -79,6 +80,7 @@ public class AuthenticationApi {
                         findMember.getName(),
                         findMember.getEmail(),
                         findMember.getDescription(),
+                        findMember.getProfile(),
                         jwtTokenProvider.createToken(findMember.getUserId(), findMember.getRole()));
 
                 return ResponseEntity.ok(response);
@@ -113,6 +115,7 @@ public class AuthenticationApi {
                     member.getName(),
                     member.getEmail(),
                     member.getDescription(),
+                    member.getProfile(),
                     token);
 
             return ResponseEntity.ok(response);
