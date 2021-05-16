@@ -40,7 +40,7 @@ public abstract class MapData extends BaseEntity implements Cloneable {
     @JoinColumn(name = "layer_id")
     private Layer layer;
 
-    @OneToMany(mappedBy = "mapData")
+    @OneToMany(mappedBy = "mapData", orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
     public void addReview(Review review) {
