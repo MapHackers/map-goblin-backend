@@ -193,10 +193,43 @@ public class SpaceService {
         }
     }
 
+    @Transactional
+    public void modify(Long spaceId, CreateSpaceRequest request){
+        Space findSpace = spaceRepository.findById(spaceId).orElse(null);
+
+        findSpace.setName(request.getName());
+        findSpace.setThumbnail(request.getThumbnail());
+        findSpace.setDescription(request.getDescription());
+        findSpace.setOneWord(request.getOneWord());
+
+        for (SpaceCategory category : findSpace.getCategories()) {
+            categoryRepository.delete(category.getCategory());
+            spaceCategoryRepository.delete(category);
+        }
+
+        for (String newCategory : request.getCategories()) {
+            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
+            System.out.println(newCategory);
+            SpaceCategory spaceCategory = new SpaceCategory();
+
+            Category myCategory = Category.createCategory(newCategory);
+
+            categoryRepository.save(myCategory);
+
+            myCategory.addSpaceCategory(spaceCategory);
+
+            findSpace.addCategory(spaceCategory);
+
+            spaceCategoryRepository.save(spaceCategory);
+
+        }
+    }
+
     public Space findByHost(Space space){
         return spaceRepository.findByHost(space).orElse(null);
     }
 
+    @Transactional
     public void delete(Space space){
         spaceRepository.delete(space);
     }

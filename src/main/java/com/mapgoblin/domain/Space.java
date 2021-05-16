@@ -28,7 +28,9 @@ public class Space extends BaseEntity implements Cloneable {
 
     private String description;
 
-    @OneToOne(fetch = LAZY)
+    private String oneWord;
+
+    @OneToOne(fetch = LAZY, orphanRemoval = true)
     @JoinColumn(name = "map_id")
     private Map map;
 
@@ -36,14 +38,14 @@ public class Space extends BaseEntity implements Cloneable {
 
     private int dislikeCount;
 
-    @OneToMany(mappedBy = "space")
+    @OneToMany(mappedBy = "space", orphanRemoval = true)
     private List<SpaceCategory> categories = new ArrayList<>();
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "host_id")
     private Space host;
 
-    @OneToMany(mappedBy = "space")
+    @OneToMany(mappedBy = "space", orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
 
     /**
