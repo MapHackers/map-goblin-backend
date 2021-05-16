@@ -22,7 +22,7 @@ public class MemberSpaceService {
     }
 
     public List<MemberSpace> findSpacesOfMember(Member member){
-        return memberSpaceRepository.findByMember(member).orElse(null);
+        return memberSpaceRepository.findByMemberOrderByCreatedDateDesc(member).orElse(null);
     }
 
     public List<MemberSpace> findBySpace(Space space){

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface MemberSpaceRepository extends JpaRepository<MemberSpace, Long>, MemberSpaceRepositoryCustom {
 
-    Optional<List<MemberSpace>> findByMember(Member member);
+    Optional<List<MemberSpace>> findByMemberOrderByCreatedDateDesc(Member member);
 
     Optional<List<MemberSpace>> findBySpace(Space space);
 }
