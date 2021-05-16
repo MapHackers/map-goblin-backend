@@ -57,6 +57,17 @@ public class AlarmApi {
         }
     }
 
+    @PostMapping("/{userId}/alarms")
+    public ResponseEntity<?> setAllRead(@PathVariable String userId){
+        if(!alarmService.setAllAlarmRead(userId)){
+            return ApiResult.errorMessage("모든 알람 읽기 처리 에러", HttpStatus.BAD_REQUEST);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+    }
+
 
 //    @PostMapping("/alarms")
 //    public ResponseEntity<?> create(@RequestBody AlarmDto request){
