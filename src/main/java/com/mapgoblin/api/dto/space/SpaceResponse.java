@@ -36,6 +36,8 @@ public class SpaceResponse {
 
     private String hostUserId;
 
+    private String hostRepoName;
+
     private List<String> categories = new ArrayList<>();
 
     private LikeType likeType;
