@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@Rollback(value = false)
+@Rollback(value = true)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class MemberApiTest {
 
