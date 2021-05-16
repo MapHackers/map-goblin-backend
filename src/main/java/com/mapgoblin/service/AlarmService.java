@@ -66,6 +66,19 @@ public class AlarmService {
 
     }
 
+    @Transactional
+    public boolean setAllAlarmRead(String memberId){
+        Member member = memberRepository.findByUserId(memberId).orElse(null);
+        List<Alarm> alarms = alarmRepository.findByDstMemberOrderByCreatedDateDesc(member).orElse(null);
+        if (alarms == null){
+            return false;
+        }
+        else{
+            alarms.forEach(alarm -> alarm.setRead(true));
+            return true;
+        }
+    }
+
     /**
      *
      * @param space
