@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface PointRepository extends JpaRepository<Point, Long> {
 
     Optional<Point> findByGeometry(String geometry);
+    Optional<Point> findByGeometryAndLayerId(String geometry, Long LayerId);
 }

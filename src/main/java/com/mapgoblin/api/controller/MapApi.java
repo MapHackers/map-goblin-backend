@@ -93,7 +93,7 @@ public class MapApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         if(request.getMapDataType().equals("point")){
-            Point point = pointService.findByGeometry(request.getGeometry());
+            Point point = pointService.findByGeometryAndLayerId(request.getGeometry(), layer.getId());
             pointService.delete(point);
         }
 
