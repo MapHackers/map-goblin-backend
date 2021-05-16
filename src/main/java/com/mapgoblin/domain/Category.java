@@ -27,10 +27,10 @@ public class Category extends BaseEntity implements Cloneable {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Category> child = new ArrayList<>();
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", orphanRemoval = true)
     private List<SpaceCategory> spaces = new ArrayList<>();
 
     public static Category createCategory(String name){

@@ -231,6 +231,14 @@ public class SpaceService {
 
     @Transactional
     public void delete(Space space){
+        List<SpaceCategory> findSpaceCategories = spaceCategoryRepository.findBySpace(space).orElse(null);
+
+        findSpaceCategories.forEach(spaceCategoryRepository::delete);
+
+        List<MemberSpace> findMemberSpaces = memberSpaceRepository.findBySpace(space).orElse(null);
+
+        findMemberSpaces.forEach(memberSpaceRepository::delete);
+
         spaceRepository.delete(space);
     }
 }

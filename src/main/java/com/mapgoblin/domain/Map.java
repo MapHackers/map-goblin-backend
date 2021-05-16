@@ -21,7 +21,7 @@ public class Map extends BaseEntity implements Cloneable {
     @Column(name = "map_id")
     private Long id;
 
-    @OneToMany(mappedBy = "map")
+    @OneToMany(mappedBy = "map", orphanRemoval = true)
     private List<Layer> layers = new ArrayList<>();
 
     /**
