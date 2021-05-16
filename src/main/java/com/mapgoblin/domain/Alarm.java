@@ -32,6 +32,8 @@ public class Alarm extends BaseEntity {
     @JoinColumn(name = "space_id")
     private Space dstSpace;
 
+    private String thumbnail;
+
     private boolean isRead;
 
     /**

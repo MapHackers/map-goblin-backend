@@ -27,6 +27,8 @@ public class AlarmResponse {
 
     private String spaceName;
 
+    private String thumbnail;
+
     private boolean isRead;
 
     public AlarmResponse(Alarm alarm){
@@ -35,6 +37,7 @@ public class AlarmResponse {
         this.srcMemberName = alarm.getCreatedBy();
         this.alarmType = alarm.getAlarmType();
         this.spaceName = alarm.getDstSpace().getName();
+        this.thumbnail = alarm.getDstSpace().getThumbnail();
         this.isRead = alarm.isRead();
     }
 }

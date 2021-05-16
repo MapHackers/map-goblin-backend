@@ -2,22 +2,18 @@ package com.mapgoblin.api.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class FindMemberResponse {
-
-    private Long id;
+@NoArgsConstructor
+public class EditProfileRequest {
 
     private String userId;
 
-    private String name;
-
-    private String email;
+    private String userName;
 
     private String description;
 
     private String profile;
-
-    private String token;
 }

@@ -5,19 +5,13 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class FindMemberResponse {
-
-    private Long id;
+public class EditProfileResponse {
 
     private String userId;
 
-    private String name;
-
-    private String email;
+    private String userName;
 
     private String description;
 
     private String profile;
-
-    private String token;
 }

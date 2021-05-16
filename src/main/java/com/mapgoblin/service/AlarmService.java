@@ -112,7 +112,7 @@ public class AlarmService {
             alarmRepository.save(alarm);
 
             AlarmResponse alarmResponse = new AlarmResponse(alarm.getId(), alarm.getDstMember().getName(),
-                    alarm.getCreatedBy(), alarm.getAlarmType(), findSpace.getName(), alarm.isRead());
+                    alarm.getCreatedBy(), alarm.getAlarmType(), findSpace.getName(), findSpace.getThumbnail(), alarm.isRead());
 
             alarmList.add(alarmResponse);
         });

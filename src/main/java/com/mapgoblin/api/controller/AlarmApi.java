@@ -23,6 +23,11 @@ import java.util.stream.Collectors;
 public class AlarmApi {
     private final AlarmService alarmService;
 
+    /**
+     *
+     * @param userId
+     * @return
+     */
     @GetMapping("/{userId}/alarms")
     public ResponseEntity<?> getAlarmList(@PathVariable String userId){
 
@@ -37,6 +42,11 @@ public class AlarmApi {
         return ResponseEntity.ok(new ApiResult(collect));
     }
 
+    /**
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/alarms")
     public ResponseEntity<?> setReadByAlarmId(@RequestBody AlarmIdDto request){
         if(!alarmService.setAlarmRead(request.getAlarmId())){

@@ -72,4 +72,19 @@ public class MemberApi {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/profile")
+    public ResponseEntity<?> editProfile(@RequestBody EditProfileRequest request){
+
+        EditProfileResponse response = null;
+
+        response = memberService.editNameAndDescription(request.getUserId(),request.getUserName(),request.getDescription(),request.getProfile());
+
+        if(response == null){
+            return ApiResult.errorMessage("프로필 변경 에러", HttpStatus.BAD_REQUEST);
+        }
+        else{
+            return ResponseEntity.ok(response);
+        }
+    }
 }

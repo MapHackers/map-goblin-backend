@@ -1,6 +1,7 @@
 package com.mapgoblin.service;
 
 import com.mapgoblin.api.dto.member.CreateMemberResponse;
+import com.mapgoblin.api.dto.member.EditProfileResponse;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.exception.UserNotFoundException;
 import com.mapgoblin.repository.MemberRepository;
@@ -87,6 +88,20 @@ public class MemberService implements UserDetailsService {
         }
 
         return member;
+    }
+
+    @Transactional
+    public EditProfileResponse editNameAndDescription(String userId, String userName, String description, String profile){
+        Member member = memberRepository.findByUserId(userId).orElse(null);
+        if (member != null){
+            member.setName(userName);
+            member.setDescription(description);
+            member.setProfile(profile);
+            return new EditProfileResponse(member.getUserId(),member.getName(), member.getDescription(), member.getProfile());
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
