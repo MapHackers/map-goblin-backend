@@ -109,6 +109,15 @@ public class SpaceApi {
 
                 spaceResponse.setCategories(collect);
 
+                Space findSpace = spaceService.findById(spaceResponse.getId());
+                List<MemberSpace> findMembers = memberSpaceService.findBySpace(findSpace);
+
+                List<String> ownerList = findMembers.stream().map(memberSpace -> {
+                    return memberSpace.getMember().getUserId();
+                }).collect(Collectors.toList());
+
+                spaceResponse.setOwners(ownerList);
+
                 Likes alreadyLike = likeService.isAlreadyLike(member, targetSpace);
 
                 if(alreadyLike == null){
@@ -139,6 +148,27 @@ public class SpaceApi {
         }catch (Exception e){
             e.printStackTrace();
 
+            return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
+        }
+    }
+
+    @PostMapping("/{userId}/repositories/{repositoryName}")
+    public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
+        List<SpaceResponse> list = null;
+
+        try{
+            list = spaceService.findOne(member.getId(), repositoryName);
+
+            if(list != null && list.size() > 0){
+                SpaceResponse spaceResponse = list.get(0);
+
+                spaceService.modify(spaceResponse.getId(), request);
+
+                return ResponseEntity.ok("ok");
+            }else{
+                return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
+            }
+        }catch (Exception e){
             return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
         }
     }
