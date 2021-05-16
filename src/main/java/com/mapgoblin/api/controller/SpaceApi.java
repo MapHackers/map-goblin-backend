@@ -130,6 +130,8 @@ public class SpaceApi {
                     Space byId = spaceService.findById(spaceResponse.getHostId());
                     List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
 
+                    spaceResponse.setHostRepoName(byId.getName());
+
                     String hostUserId = bySpace.get(0).getMember().getUserId();
 
                     spaceResponse.setHostUserId(hostUserId);
