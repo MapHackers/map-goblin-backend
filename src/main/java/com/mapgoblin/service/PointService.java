@@ -19,6 +19,11 @@ public class PointService {
 
     }
 
+    public Point findByGeometryAndLayerId(String geometry, Long LayerId){
+        return pointRepository.findByGeometryAndLayerId(geometry, LayerId)
+                .orElse(null);
+    }
+
     public void delete(Point point){
         pointRepository.delete(point);
     }
