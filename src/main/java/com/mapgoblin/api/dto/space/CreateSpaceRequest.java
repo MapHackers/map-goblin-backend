@@ -12,4 +12,5 @@ public class CreateSpaceRequest {
     private String thumbnail;
     private String description;
     private List<String> categories;
+    private String oneWord;
 }

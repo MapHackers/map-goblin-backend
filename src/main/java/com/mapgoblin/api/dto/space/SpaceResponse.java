@@ -22,6 +22,8 @@ public class SpaceResponse {
 
     private String description;
 
+    private String oneWord;
+
     private int likeCount;
 
     private int dislikeCount;
@@ -38,14 +40,17 @@ public class SpaceResponse {
 
     private LikeType likeType;
 
+    private List<String> owners = new ArrayList<>();
+
     @QueryProjection
     public SpaceResponse(Long id, Long map_id, String name, String thumbnail,
-                               String description, int likeCount, int dislikeCount, SourceType source, Long hostId){
+                               String description, String oneWord, int likeCount, int dislikeCount, SourceType source, Long hostId){
         this.id = id;
         this.map_id = map_id;
         this.name = name;
         this.thumbnail = thumbnail;
         this.description = description;
+        this.oneWord = oneWord;
         this.likeCount = likeCount;
         this.dislikeCount = dislikeCount;
         this.source = source;
