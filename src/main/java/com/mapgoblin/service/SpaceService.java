@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class SpaceService {
     private final ReviewRepository reviewRepository;
     private final CategoryRepository categoryRepository;
     private final SpaceCategoryRepository spaceCategoryRepository;
+    private final AlarmRepository alarmRepository;
 
     /**
      * Find all repositories
@@ -231,6 +233,11 @@ public class SpaceService {
 
     @Transactional
     public void delete(Space space){
+
+        List<Alarm> byDstSpace = alarmRepository.findByDstSpace(space).orElse(null);
+
+        byDstSpace.forEach(alarmRepository::delete);
+
         List<SpaceCategory> findSpaceCategories = spaceCategoryRepository.findBySpace(space).orElse(null);
 
         findSpaceCategories.forEach(spaceCategoryRepository::delete);
