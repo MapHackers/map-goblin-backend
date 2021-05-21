@@ -185,7 +185,7 @@
                 "id" : 2,
                 "userId" : "test123"
               },
-            ]
+            ],
   "categories" : [
                 {
                   "id" : 1,
