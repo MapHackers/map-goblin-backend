@@ -1,7 +1,10 @@
 package com.mapgoblin.domain;
 
+import com.mapgoblin.api.dto.issue.CreateIssueRequest;
 import com.mapgoblin.domain.base.BaseEntity;
+import com.mapgoblin.domain.base.IssueStatus;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -9,6 +12,7 @@ import static javax.persistence.FetchType.*;
 
 @Entity
 @Getter
+@Setter
 public class Issue extends BaseEntity {
 
     @Id @GeneratedValue
@@ -22,4 +26,18 @@ public class Issue extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "space_id")
     private Space space;
+
+    @Enumerated(EnumType.STRING)
+    private IssueStatus status;
+
+    public static Issue create(String title, String content, Space space) {
+        Issue issue = new Issue();
+
+        issue.setTitle(title);
+        issue.setContent(content);
+        issue.setSpace(space);
+        issue.setStatus(IssueStatus.WAITING);
+
+        return issue;
+    }
 }
