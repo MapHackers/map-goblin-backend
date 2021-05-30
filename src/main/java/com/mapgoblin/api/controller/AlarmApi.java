@@ -9,12 +9,14 @@ import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.service.AlarmService;
+import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AlarmApi {
     private final AlarmService alarmService;
+    private final MemberService memberService;
 
     /**
      *
@@ -35,11 +38,17 @@ public class AlarmApi {
         if (alarms == null) {
             return ApiResult.errorMessage("alarm 없음", HttpStatus.BAD_REQUEST);
         }
-        List<AlarmResponse> collect = alarms.stream()
-                .map(alarm -> new AlarmResponse(alarm))
-                .collect(Collectors.toList());
+        List<AlarmResponse> alarmResponseList = new ArrayList<AlarmResponse>();
+        for (Alarm alarm:alarms
+             ) {
+            Member member = memberService.findByUserId(alarm.getCreatedBy());
+            System.out.println("@@@@@@@@@@@@@@" + alarm.getCreatedDate());
+            if (member != null) {
+                alarmResponseList.add(new AlarmResponse(alarm, member.getName()));
+            }
+        }
 
-        return ResponseEntity.ok(new ApiResult(collect));
+        return ResponseEntity.ok(new ApiResult(alarmResponseList));
     }
 
     /**

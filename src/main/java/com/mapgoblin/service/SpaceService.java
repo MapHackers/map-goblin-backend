@@ -248,4 +248,8 @@ public class SpaceService {
 
         spaceRepository.delete(space);
     }
+
+    public List<Space> search(String keyword){
+        return spaceRepository.findByNameContaining(keyword).orElse(null);
+    }
 }
