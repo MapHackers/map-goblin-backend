@@ -46,4 +46,17 @@ public class SpaceDto {
                 .map(spaceCategory -> new SpaceCategoryDto(spaceCategory))
                 .collect(Collectors.toList());
     }
+    public SpaceDto(Space space, String ownerId) {
+        this.id = space.getId();
+        this.name = space.getName();
+        this.thumbnail = space.getThumbnail();
+        this.description = space.getDescription();
+        this.likeCount = space.getLikeCount();
+        this.dislikeCount = space.getDislikeCount();
+        this.categories = space.getCategories()
+                .stream()
+                .map(spaceCategory -> new SpaceCategoryDto(spaceCategory))
+                .collect(Collectors.toList());
+        this.ownerId = ownerId;
+    }
 }
