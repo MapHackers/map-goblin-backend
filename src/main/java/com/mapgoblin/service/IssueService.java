@@ -40,4 +40,15 @@ public class IssueService {
 
         return result;
     }
+
+    public GetIssueResponse findById(Long id){
+        Issue issue = issueRepository.findById(id).orElse(null);
+
+        if (issue != null) {
+            return new GetIssueResponse(issue.getTitle(), issue.getContent(),
+                    issue.getStatus(), issue.getCreatedDate(), issue.getCreatedBy());
+        }
+
+        return null;
+    }
 }

@@ -85,5 +85,24 @@ public class IssueApi {
 
     }
 
+    /**
+     * get one issue information
+     *
+     * @param userId
+     * @param repositoryName
+     * @param id
+     * @return
+     */
+    @GetMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
+    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
+        GetIssueResponse result = issueService.findById(id);
+
+        if (result != null){
+            return ResponseEntity.ok(result);
+        }else{
+            return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+    }
 }
