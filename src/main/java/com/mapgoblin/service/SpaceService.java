@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -250,6 +253,14 @@ public class SpaceService {
     }
 
     public List<Space> search(String keyword){
-        return spaceRepository.findByNameContaining(keyword).orElse(null);
+        List<Space> containingNameSpaces = spaceRepository.findByNameContaining(keyword).orElse(null);
+        List<Space> containingDescriptionSpaces = spaceRepository.findByDescriptionContaining(keyword).orElse(null);
+
+        Comparator<Space> compareByCreatedDate = Comparator.comparing( Space::getCreatedDate ).reversed();
+
+        return Stream.concat(containingNameSpaces.stream(), containingDescriptionSpaces.stream())
+                .distinct()
+                .sorted(compareByCreatedDate)
+                .collect(Collectors.toList());
     }
 }

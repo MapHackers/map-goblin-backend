@@ -7,6 +7,7 @@ import com.mapgoblin.domain.base.LikeType;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class SpaceDto {
 
     private LikeType likeType;
 
+    private LocalDateTime date;
+
     public SpaceDto(Space space) {
         this.id = space.getId();
         this.name = space.getName();
@@ -58,5 +61,6 @@ public class SpaceDto {
                 .map(spaceCategory -> new SpaceCategoryDto(spaceCategory))
                 .collect(Collectors.toList());
         this.ownerId = ownerId;
+        this.date = space.getCreatedDate();
     }
 }
