@@ -22,13 +22,13 @@ public class Review extends BaseEntity implements Cloneable {
     @Column(name = "review_id")
     private Long id;
 
-    private String title;
+    private String author;
 
     private String content;
 
-    private String img;
+//    private String img;
 
-    private int rating;
+    private float rating;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "map_data_id")
@@ -39,6 +39,25 @@ public class Review extends BaseEntity implements Cloneable {
         Review review = (Review) super.clone();
         review.id = null;
         review.mapData = null;
+
+        return review;
+    }
+
+    /**
+     *
+     * Create Review method
+     *
+     * @param mapData
+     * @param content
+     * @param rating
+     */
+    public static Review createReview(MapData mapData, String content, Float rating, String author){
+        Review review = new Review();
+
+        review.setMapData(mapData);
+        review.setContent(content);
+        review.setRating(rating);
+        review.setAuthor(author);
 
         return review;
     }

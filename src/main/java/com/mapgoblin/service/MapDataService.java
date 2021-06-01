@@ -27,5 +27,10 @@ public class MapDataService {
                 .orElse(null);
     }
 
+    public MapData findById(Long id){
+        return mapDataRepository.findById(id)
+                .orElse(null);
+    }
+
 
 }
