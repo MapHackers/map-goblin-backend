@@ -4,8 +4,11 @@ import com.mapgoblin.api.dto.issue.CreateIssueResponse;
 import com.mapgoblin.api.dto.issue.GetIssueResponse;
 import com.mapgoblin.domain.Issue;
 import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.base.IssueStatus;
 import com.mapgoblin.repository.IssueRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,18 +30,10 @@ public class IssueService {
                 issue.getStatus(), issue.getCreatedDate(), issue.getCreatedBy());
     }
 
-    public List<GetIssueResponse> findBySpace(Space space){
-        List<GetIssueResponse> result = null;
-        List<Issue> issueList = issueRepository.findBySpace(space).orElse(null);
+    public Page<GetIssueResponse> findBySpace(Space space, IssueStatus status, Pageable pageable){
+        Page<Issue> issueList = issueRepository.findBySpaceAndStatus(space, status, pageable);
 
-        if (issueList != null){
-            result = issueList.stream().map(issue -> {
-                return new GetIssueResponse(issue.getTitle(), issue.getContent(),
-                        issue.getStatus(), issue.getCreatedDate(), issue.getCreatedBy());
-            }).collect(Collectors.toList());
-        }
-
-        return result;
+        return issueList.map(GetIssueResponse::new);
     }
 
     public GetIssueResponse findById(Long id){
