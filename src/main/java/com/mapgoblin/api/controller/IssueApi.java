@@ -8,10 +8,15 @@ import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Issue;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.base.IssueStatus;
 import com.mapgoblin.service.IssueService;
 import com.mapgoblin.service.MemberService;
 import com.mapgoblin.service.SpaceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,7 +68,9 @@ public class IssueApi {
      * @return
      */
     @GetMapping("/{userId}/repositories/{repositoryName}/issues")
-    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName) {
+    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName,
+                                          @RequestParam String status,
+                                          @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -72,10 +79,10 @@ public class IssueApi {
         if (target.get(0) != null && target.size() == 1) {
             Space space = spaceService.findById(target.get(0).getId());
 
-            List<GetIssueResponse> result = issueService.findBySpace(space);
+            Page<GetIssueResponse> result = issueService.findBySpace(space, IssueStatus.valueOf(status), pageable);
 
             if (result != null){
-                return ResponseEntity.ok(new ApiResult(result));
+                return ResponseEntity.ok(result);
             }else{
                 return ApiResult.errorMessage("이슈가 존재하지 않습니다.", HttpStatus.BAD_REQUEST);
             }
