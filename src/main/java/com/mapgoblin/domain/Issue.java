@@ -3,6 +3,7 @@ package com.mapgoblin.domain;
 import com.mapgoblin.api.dto.issue.CreateIssueRequest;
 import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.IssueStatus;
+import com.mapgoblin.domain.base.IssueTag;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,9 @@ public class Issue extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private IssueStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private IssueTag tag;
 
     public static Issue create(String title, String content, Space space) {
         Issue issue = new Issue();
