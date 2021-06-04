@@ -296,7 +296,9 @@ public class SpaceApi {
             Space space = like.getSpace();
             SpaceDto spaceDto = new SpaceDto(like.getSpace());
             resultSpaceDto.add(spaceDto);
-            
+            List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
+            spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
+
             Likes alreadyLike = likeService.isAlreadyLike(findMember, space);
 
             if(alreadyLike == null){
