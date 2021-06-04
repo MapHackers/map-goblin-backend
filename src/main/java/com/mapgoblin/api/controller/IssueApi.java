@@ -70,7 +70,7 @@ public class IssueApi {
     @GetMapping("/{userId}/repositories/{repositoryName}/issues")
     public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName,
                                           @RequestParam String status,
-                                          @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+                                          @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Member findMember = memberService.findByUserId(userId);
 

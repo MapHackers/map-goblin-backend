@@ -41,7 +41,7 @@ public class IssueService {
 
         if (issue != null) {
             return new GetIssueResponse(issue.getTitle(), issue.getContent(),
-                    issue.getStatus(), issue.getCreatedDate(), issue.getCreatedBy());
+                    issue.getStatus(), issue.getTag(), issue.getCreatedDate(), issue.getCreatedBy());
         }
 
         return null;

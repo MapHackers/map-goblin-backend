@@ -2,6 +2,7 @@ package com.mapgoblin.api.dto.issue;
 
 import com.mapgoblin.domain.Issue;
 import com.mapgoblin.domain.base.IssueStatus;
+import com.mapgoblin.domain.base.IssueTag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,8 @@ public class GetIssueResponse {
 
     private IssueStatus status;
 
+    private IssueTag tag;
+
     private LocalDateTime createdDate;
 
     private String createdBy;
@@ -26,6 +29,7 @@ public class GetIssueResponse {
         this.title = issue.getTitle();
         this.content = issue.getContent();
         this.status = issue.getStatus();
+        this.tag = issue.getTag();
         this.createdBy = issue.getCreatedBy();
         this.createdDate = issue.getCreatedDate();
     }
