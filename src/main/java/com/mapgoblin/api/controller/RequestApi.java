@@ -4,16 +4,13 @@ import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.request.CompareDto;
 import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
-import com.mapgoblin.domain.Layer;
-import com.mapgoblin.domain.Member;
-import com.mapgoblin.domain.Request;
-import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.*;
+import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.MemberService;
 import com.mapgoblin.service.RequestService;
 import com.mapgoblin.service.SpaceService;
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,12 +53,79 @@ public class RequestApi {
         }
     }
 
+    @GetMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}")
+    public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+
+        HashMap<String, List<HashMap<String, String>>> result = new HashMap<>();
+
+        Request request = requestService.findById(requestId);
+
+        // request title, content
+        List<HashMap<String, String>> values = new ArrayList<>();
+
+        HashMap<String, String> value = new HashMap<>();
+
+        value.put("title", request.getTitle());
+        value.put("content", request.getContent());
+        value.put("status", request.getStatus().toString());
+
+        values.add(value);
+
+        result.put("values", values);
+
+        // request data
+        List<RequestData> requestDataList = request.getRequestDataList();
+        List<HashMap<String, String>> added = new ArrayList<>();
+        List<HashMap<String, String>> modified = new ArrayList<>();
+        List<HashMap<String, String>> delete = new ArrayList<>();
+        List<HashMap<String, String>> layer = new ArrayList<>();
+
+        for (RequestData requestData : requestDataList) {
+
+            HashMap<String, String> data = new HashMap<>();
+
+            data.put("name", requestData.getName());
+            data.put("createdDate", requestData.getCreateDate().toString());
+
+            if(requestData.getAction() == RequestAction.INSERT){
+                if(requestData.getMapDataId() == null){
+                    //layer
+                    layer.add(data);
+                }else{
+                    //added
+                    added.add(data);
+                }
+            }else if(requestData.getAction() == RequestAction.UPDATE){
+                //modified
+                modified.add(data);
+            }else if(requestData.getAction() == RequestAction.DELETE){
+                //delete
+                delete.add(data);
+            }
+        }
+
+        if(!added.isEmpty()){
+            result.put("added", added);
+        }
+
+        if(!modified.isEmpty()){
+            result.put("modified", modified);
+        }
+
+        if(!delete.isEmpty()){
+            result.put("delete", delete);
+        }
+
+        if(!layer.isEmpty()){
+            result.put("layer", layer);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> create(@RequestBody HashMap<String, List<HashMap<String, String>>> request,
                                     @PathVariable String userId, @PathVariable String repositoryName) {
-
-        System.out.println("리퀘스트 생성");
-        System.out.println(request.toString());
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -80,7 +144,7 @@ public class RequestApi {
             return ResponseEntity.ok(result);
 
         }else{
-            return ApiResult.errorMessage("해당 레포지토리가 존재하지 않습니다.", HttpStatus.BAD_REQUEST);
+            return ApiResult.errorMessage("해당 지도가 존재하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -221,8 +285,6 @@ public class RequestApi {
                         }
                     }
                 }
-
-
 
                 if(result.isEmpty()){
                     return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);

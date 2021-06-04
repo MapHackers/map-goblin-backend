@@ -99,4 +99,8 @@ public class RequestService {
 
         return request.getId();
     }
+
+    public Request findById(Long id){
+        return requestRepository.findById(id).orElse(null);
+    }
 }
