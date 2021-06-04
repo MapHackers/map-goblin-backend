@@ -2,10 +2,7 @@ package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.space.*;
-import com.mapgoblin.domain.Likes;
-import com.mapgoblin.domain.Member;
-import com.mapgoblin.domain.MemberSpace;
-import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.SourceType;
 import com.mapgoblin.service.*;
@@ -27,6 +24,8 @@ public class SpaceApi {
     private final SpaceService spaceService;
     private final AlarmService alarmService;
     private final LikeService likeService;
+    private final CategoryService categoryService;
+    private final SpaceCategoryService spaceCategoryService;
 
     /**
      * Get all repositories
@@ -300,6 +299,48 @@ public class SpaceApi {
             spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
 
             Likes alreadyLike = likeService.isAlreadyLike(findMember, space);
+
+            if(alreadyLike == null){
+                spaceDto.setLikeType(null);
+            }else{
+                spaceDto.setLikeType(alreadyLike.getType());
+            }
+        }
+
+        return ResponseEntity.ok(new ApiResult<>(resultSpaceDto));
+    }
+
+    /**
+     * Get specific category Repositories
+     *
+     * @Return
+     */
+    @GetMapping("/{categoryName}/repositories/category")
+    public ResponseEntity<?> findByCategory(@PathVariable String categoryName, @AuthenticationPrincipal Member member){
+        List<Category> categoryList = categoryService.findByName(categoryName);
+
+        if(categoryList == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        ArrayList<SpaceCategory> spaceCategoryArrayList = new ArrayList<>();
+
+        for(Category category: categoryList){
+            SpaceCategory spaceCategory = spaceCategoryService.findByCategoryId(category.getId());
+            spaceCategoryArrayList.add(spaceCategory);
+        }
+
+        ArrayList<SpaceDto> resultSpaceDto = new ArrayList<>();
+
+        for(SpaceCategory spaceCategory: spaceCategoryArrayList){
+            Space space = spaceCategory.getSpace();
+
+            SpaceDto spaceDto = new SpaceDto(space);
+            resultSpaceDto.add(spaceDto);
+            List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
+            spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
+
+            Likes alreadyLike = likeService.isAlreadyLike(member, space);
 
             if(alreadyLike == null){
                 spaceDto.setLikeType(null);
