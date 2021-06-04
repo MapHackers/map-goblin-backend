@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface SpaceRepository extends JpaRepository<Space, Long> {
 
-    Optional<Space> findByHost(Space space);
+    Optional<List<Space>> findByHost(Space space);
 
     Optional<List<Space>> findByName(String name);
 

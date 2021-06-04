@@ -14,4 +14,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     Page<Issue> findBySpaceAndStatus(Space space, IssueStatus status, Pageable pageable);
 
+    Optional<List<Issue>> findBySpace(Space space);
+
 }

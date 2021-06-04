@@ -30,6 +30,7 @@ public class SpaceService {
     private final CategoryRepository categoryRepository;
     private final SpaceCategoryRepository spaceCategoryRepository;
     private final AlarmRepository alarmRepository;
+    private final IssueRepository issueRepository;
 
     /**
      * Find all repositories
@@ -90,9 +91,15 @@ public class SpaceService {
 
         try{
 
+            Layer layer = Layer.createLayer("Layer1");
+
             Map map = Map.createMap();
 
+            map.addLayer(layer);
+
             mapRepository.save(map);
+
+            layerRepository.save(layer);
 
             Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
 
@@ -224,12 +231,12 @@ public class SpaceService {
         }
     }
 
-    public Space findByHost(Space space){
-        return spaceRepository.findByHost(space).orElse(null);
-    }
-
     @Transactional
     public void delete(Space space){
+
+        List<Issue> findIssues = issueRepository.findBySpace(space).orElse(null);
+
+        findIssues.forEach(issueRepository::delete);
 
         List<Alarm> byDstSpace = alarmRepository.findByDstSpace(space).orElse(null);
 
@@ -242,6 +249,14 @@ public class SpaceService {
         List<MemberSpace> findMemberSpaces = memberSpaceRepository.findBySpace(space).orElse(null);
 
         findMemberSpaces.forEach(memberSpaceRepository::delete);
+
+        List<Space> byHost = spaceRepository.findByHost(space).orElse(null);
+
+        if(byHost != null){
+            byHost.forEach(cloned -> {
+                cloned.setHost(null);
+            });
+        }
 
         spaceRepository.delete(space);
     }
