@@ -151,10 +151,6 @@ public class SpaceService {
 
             Map copyMap = copySpace.getMap();
 
-            System.out.println("//////////////////////////");
-            System.out.println(copyMap.getLayers().size());
-            System.out.println("//////////////////////////");
-
             mapRepository.save(copyMap);
 
             copyMap.getLayers().forEach(layer -> {
@@ -213,8 +209,6 @@ public class SpaceService {
         }
 
         for (String newCategory : request.getCategories()) {
-            System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%");
-            System.out.println(newCategory);
             SpaceCategory spaceCategory = new SpaceCategory();
 
             Category myCategory = Category.createCategory(newCategory);

@@ -30,6 +30,10 @@ public class Layer extends BaseEntity implements Cloneable {
     @JoinColumn(name = "map_id")
     private Map map;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "host_id")
+    private Layer host;
+
     @OneToMany(mappedBy = "layer", orphanRemoval = true)
     private List<MapData> mapDataList = new ArrayList<>();
 

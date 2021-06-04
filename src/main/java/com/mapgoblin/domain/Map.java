@@ -57,6 +57,7 @@ public class Map extends BaseEntity implements Cloneable {
             try{
                 Layer clone = (Layer) layer.clone();
                 clone.setMap(map);
+                clone.setHost(layer);
                 result.add(clone);
             }catch (CloneNotSupportedException e){
                 e.printStackTrace();

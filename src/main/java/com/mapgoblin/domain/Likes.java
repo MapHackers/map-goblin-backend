@@ -23,9 +23,11 @@ public class Likes {
     private Long id;
 
     @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "space_id")
     private Space space;
 
     @Enumerated(EnumType.STRING)

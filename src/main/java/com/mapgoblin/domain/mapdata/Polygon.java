@@ -9,8 +9,6 @@ import javax.persistence.Entity;
 @DiscriminatorValue("POLYGON")
 @Getter
 public class Polygon extends MapData {
-    private String geometry;
-
     private String color;
 
     @Override

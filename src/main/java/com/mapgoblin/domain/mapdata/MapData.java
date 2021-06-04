@@ -28,6 +28,8 @@ public abstract class MapData extends BaseEntity implements Cloneable {
     @Column(name = "map_data_id")
     private Long id;
 
+    private String geometry;
+
     private String name;
 
     private String description;
@@ -71,5 +73,13 @@ public abstract class MapData extends BaseEntity implements Cloneable {
         }
 
         return result;
+    }
+
+    public boolean equals(MapData mapData) {
+        if(this.name.equals(mapData.name) && this.description.equals(mapData.description) && this.thumbnail.equals(mapData.thumbnail)){
+            return true;
+        }
+
+        return false;
     }
 }

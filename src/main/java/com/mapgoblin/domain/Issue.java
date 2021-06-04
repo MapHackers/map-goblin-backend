@@ -1,6 +1,5 @@
 package com.mapgoblin.domain;
 
-import com.mapgoblin.api.dto.issue.CreateIssueRequest;
 import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.IssueStatus;
 import com.mapgoblin.domain.base.IssueTag;
@@ -41,6 +40,7 @@ public class Issue extends BaseEntity {
         issue.setContent(content);
         issue.setSpace(space);
         issue.setStatus(IssueStatus.WAITING);
+        issue.setTag(IssueTag.ISSUE);
 
         return issue;
     }

@@ -11,8 +11,6 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 public class Line extends MapData {
-    private String geometry;
-
     private String color;
 
     @Override
