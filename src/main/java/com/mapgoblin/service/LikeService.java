@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -78,5 +80,10 @@ public class LikeService {
 
     public Likes isAlreadyLike(Member member, Space space){
         return likeRepository.findByMemberAndSpace(member, space).orElse(null);
+    }
+
+    public List<Likes> findByMemberId(Long memberId){
+        return likeRepository.findByMemberId(memberId)
+                .orElse(null);
     }
 }

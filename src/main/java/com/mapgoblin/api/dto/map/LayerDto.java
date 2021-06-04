@@ -20,7 +20,7 @@ public class LayerDto {
         this.name = layer.getName();
         this.mapDatas = layer.getMapDataList()
                 .stream()
-                .map(mapData -> new MapDataDto(mapData))
+                .map(mapData -> new MapDataDto(mapData, this.name))
                 .collect(Collectors.toList());
 
 

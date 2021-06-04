@@ -40,7 +40,9 @@ public class MapApi {
 
         Map map = mapService.findByMapId(request.getMapId());
         Layer layer = layerService.findByLayerNameAndMapId(request.getLayerName(), request.getMapId());
-
+        if(request.getLayerName() == null){
+            request.setLayerName("Layer1");
+        }
 
         if (map == null){
             // 요청해온 map id 가 유효하지 않을경우 오류

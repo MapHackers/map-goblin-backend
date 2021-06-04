@@ -273,4 +273,39 @@ public class SpaceApi {
 
         return ResponseEntity.ok(checkHost);
     }
+
+    /**
+     * Get repositories what user liked
+     * 유저가 좋아요한 지도 목록 가져오기
+     *
+     * @return
+     */
+    @GetMapping("/{userId}/repositories/likes")
+    public ResponseEntity<?> findRepositoryWhatUserLiked(@PathVariable Long userId){
+        Member findMember = memberService.findById(userId);
+
+        List<Likes> spaceIdList = likeService.findByMemberId(userId);
+
+        if(spaceIdList == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        ArrayList<SpaceDto> resultSpaceDto = new ArrayList<>();
+
+        for(Likes like: spaceIdList){
+            Space space = like.getSpace();
+            SpaceDto spaceDto = new SpaceDto(like.getSpace());
+            resultSpaceDto.add(spaceDto);
+            
+            Likes alreadyLike = likeService.isAlreadyLike(findMember, space);
+
+            if(alreadyLike == null){
+                spaceDto.setLikeType(null);
+            }else{
+                spaceDto.setLikeType(alreadyLike.getType());
+            }
+        }
+
+        return ResponseEntity.ok(new ApiResult<>(resultSpaceDto));
+    }
 }

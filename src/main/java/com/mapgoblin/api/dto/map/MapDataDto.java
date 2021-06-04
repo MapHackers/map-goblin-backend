@@ -24,13 +24,16 @@ public class MapDataDto {
 
     private List<ReviewDto> reviews;
 
-    public MapDataDto(MapData mapData){
+    private String layerName;
+
+    public MapDataDto(MapData mapData, String LayerName){
         this.id = mapData.getId();
         this.name = mapData.getName();
         this.description = mapData.getDescription();
         this.rating = mapData.getRating();
         this.thumbnail = mapData.getThumbnail();
         this.latlng = ((Point)mapData).getGeometry();
+        this.layerName = LayerName;
         this.reviews = mapData.getReviews()
                 .stream()
                 .map(review -> new ReviewDto(review))
