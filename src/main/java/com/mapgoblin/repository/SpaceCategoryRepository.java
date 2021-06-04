@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface SpaceCategoryRepository extends JpaRepository<SpaceCategory, Long> {
 
     Optional<List<SpaceCategory>> findBySpace(Space space);
+    Optional<SpaceCategory> findByCategoryId(Long id);
 }
