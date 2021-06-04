@@ -1,6 +1,5 @@
 package com.mapgoblin.domain;
 
-import com.mapgoblin.api.dto.issue.CreateIssueRequest;
 import com.mapgoblin.domain.base.BaseEntity;
 import com.mapgoblin.domain.base.IssueStatus;
 import com.mapgoblin.domain.base.IssueTag;

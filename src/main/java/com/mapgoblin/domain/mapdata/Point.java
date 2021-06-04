@@ -14,7 +14,6 @@ import static javax.persistence.FetchType.*;
 @Getter
 @Setter
 public class Point extends MapData {
-    private String geometry;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "marker_id")
