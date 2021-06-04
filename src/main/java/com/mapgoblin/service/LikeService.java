@@ -78,6 +78,19 @@ public class LikeService {
         }
     }
 
+    @Transactional
+    public boolean addVisit(String userId, String spaceName){
+        List<Space> spaceList = spaceRepository.findByName(spaceName).orElse(null);
+        if (spaceList == null) return false;
+        for (Space space: spaceList) {
+            if (space.getCreatedBy().equals(userId)) {
+                space.setVisitCount(space.getVisitCount()+1);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Likes isAlreadyLike(Member member, Space space){
         return likeRepository.findByMemberAndSpace(member, space).orElse(null);
     }

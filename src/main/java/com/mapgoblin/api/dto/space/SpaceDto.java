@@ -1,6 +1,7 @@
 package com.mapgoblin.api.dto.space;
 
 import com.mapgoblin.domain.Map;
+import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.SpaceCategory;
 import com.mapgoblin.domain.base.LikeType;
@@ -29,7 +30,13 @@ public class SpaceDto {
 
     private int dislikeCount;
 
+    private int visitCount;
+
     private String ownerId;
+
+    private String userName;
+
+    private String userProfile;
 
     private List<SpaceCategoryDto> categories;
 
@@ -44,23 +51,27 @@ public class SpaceDto {
         this.description = space.getDescription();
         this.likeCount = space.getLikeCount();
         this.dislikeCount = space.getDislikeCount();
+        this.visitCount = space.getVisitCount();
         this.categories = space.getCategories()
                 .stream()
                 .map(spaceCategory -> new SpaceCategoryDto(spaceCategory))
                 .collect(Collectors.toList());
     }
-    public SpaceDto(Space space, String ownerId) {
+    public SpaceDto(Space space, Member member) {
         this.id = space.getId();
         this.name = space.getName();
         this.thumbnail = space.getThumbnail();
         this.description = space.getDescription();
         this.likeCount = space.getLikeCount();
         this.dislikeCount = space.getDislikeCount();
+        this.visitCount = space.getVisitCount();
         this.categories = space.getCategories()
                 .stream()
                 .map(spaceCategory -> new SpaceCategoryDto(spaceCategory))
                 .collect(Collectors.toList());
-        this.ownerId = ownerId;
+        this.ownerId = member.getUserId();
+        this.userName = member.getName();
+        this.userProfile = member.getProfile();
         this.date = space.getCreatedDate();
     }
 }
