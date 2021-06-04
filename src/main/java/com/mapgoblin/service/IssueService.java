@@ -40,8 +40,7 @@ public class IssueService {
         Issue issue = issueRepository.findById(id).orElse(null);
 
         if (issue != null) {
-            return new GetIssueResponse(issue.getTitle(), issue.getContent(),
-                    issue.getStatus(), issue.getTag(), issue.getCreatedDate(), issue.getCreatedBy());
+            return new GetIssueResponse(issue);
         }
 
         return null;

@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetIssueResponse {
+
+    private Long id;
+
     private String title;
 
     private String content;
@@ -26,6 +29,7 @@ public class GetIssueResponse {
     private String createdBy;
 
     public GetIssueResponse(Issue issue) {
+        this.id = issue.getId();
         this.title = issue.getTitle();
         this.content = issue.getContent();
         this.status = issue.getStatus();
