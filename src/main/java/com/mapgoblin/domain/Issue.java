@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.FetchType.*;
 
 @Entity
@@ -33,6 +36,9 @@ public class Issue extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private IssueTag tag;
 
+    @OneToMany(mappedBy = "issue", orphanRemoval = true)
+    private List<IssueReply> replies = new ArrayList<>();
+
     public static Issue create(String title, String content, Space space) {
         Issue issue = new Issue();
 
@@ -43,5 +49,10 @@ public class Issue extends BaseEntity {
         issue.setTag(IssueTag.ISSUE);
 
         return issue;
+    }
+
+    public void addReply(IssueReply reply){
+        replies.add(reply);
+        reply.setIssue(this);
     }
 }
