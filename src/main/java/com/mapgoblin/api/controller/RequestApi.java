@@ -6,6 +6,7 @@ import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Layer;
 import com.mapgoblin.domain.Member;
+import com.mapgoblin.domain.Request;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.MemberService;
@@ -56,9 +57,31 @@ public class RequestApi {
     }
 
     @PostMapping("/{userId}/repositories/{repositoryName}/requests")
-    public ResponseEntity<?> create() {
+    public ResponseEntity<?> create(@RequestBody HashMap<String, List<HashMap<String, String>>> request,
+                                    @PathVariable String userId, @PathVariable String repositoryName) {
 
-        return ResponseEntity.ok("");
+        System.out.println("리퀘스트 생성");
+        System.out.println(request.toString());
+
+        Member findMember = memberService.findByUserId(userId);
+
+        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+
+        if (target.size() == 1 && target.get(0) != null){
+            List<HashMap<String, String>> values = request.get("values");
+            Space findSpace = spaceService.findById(target.get(0).getId());
+
+            Request request1 = Request.create(values.get(0).get("title"), values.get(1).get("content"), findSpace);
+
+            HashMap<String, Long> result = new HashMap<>();
+
+            result.put("requestId", requestService.save(request1, request));
+
+            return ResponseEntity.ok(result);
+
+        }else{
+            return ApiResult.errorMessage("해당 레포지토리가 존재하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{userId}/repositories/{repositoryName}/compare")
@@ -81,6 +104,25 @@ public class RequestApi {
 
                 List<Layer> hostLayers = hostSpace.getMap().getLayers();
                 List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
+
+                //새로 생성된 레이어
+                List<CompareDto> createdLayer = new ArrayList<>();
+
+                for (Layer clonedLayer : clonedLayers) {
+                    if(clonedLayer.getHost() == null){
+                        CompareDto compareDto = new CompareDto();
+                        compareDto.setId(clonedLayer.getId());
+                        compareDto.setLayerId(clonedLayer.getId());
+                        compareDto.setName(clonedLayer.getName());
+                        compareDto.setCreatedDate(clonedLayer.getModifiedDate());
+
+                        createdLayer.add(compareDto);
+                    }
+                }
+
+                if(!createdLayer.isEmpty()){
+                    result.put("layer", createdLayer);
+                }
 
                 for (Layer hostLayer : hostLayers) {
                     for (Layer clonedLayer : clonedLayers) {
@@ -109,6 +151,7 @@ public class RequestApi {
                                 if(!cloneGeom.containsKey(s)){
                                     CompareDto compareDto = new CompareDto();
                                     compareDto.setId(mapData.getId());
+                                    compareDto.setLayerId(hostLayer.getId());
                                     compareDto.setName(mapData.getName());
                                     compareDto.setCreatedDate(mapData.getModifiedDate());
 
@@ -124,7 +167,9 @@ public class RequestApi {
 
                             geoms.clear();
 
-                            result.put("delete", deleteList);
+                            if(!deleteList.isEmpty()){
+                                result.put("delete", deleteList);
+                            }
 
                             //추가된 데이터
                             List<CompareDto> addedList = new ArrayList<>();
@@ -133,6 +178,7 @@ public class RequestApi {
                                 if(!hostGeom.containsKey(s)){
                                     CompareDto compareDto = new CompareDto();
                                     compareDto.setId(mapData.getId());
+                                    compareDto.setLayerId(hostLayer.getId());
                                     compareDto.setName(mapData.getName());
                                     compareDto.setCreatedDate(mapData.getModifiedDate());
 
@@ -146,7 +192,9 @@ public class RequestApi {
                                 cloneGeom.remove(geom);
                             }
 
-                            result.put("added", addedList);
+                            if(!addedList.isEmpty()){
+                                result.put("added", addedList);
+                            }
 
                             //수정된 데이터
                             List<CompareDto> modifiedList = new ArrayList<>();
@@ -157,6 +205,7 @@ public class RequestApi {
                                 if(!mapData.equals(hostData)){
                                     CompareDto compareDto = new CompareDto();
                                     compareDto.setId(mapData.getId());
+                                    compareDto.setLayerId(hostLayer.getId());
                                     compareDto.setName(mapData.getName());
                                     compareDto.setCreatedDate(mapData.getModifiedDate());
 
@@ -164,7 +213,9 @@ public class RequestApi {
                                 }
                             });
 
-                            result.put("modified", modifiedList);
+                            if(!modifiedList.isEmpty()){
+                                result.put("modified", modifiedList);
+                            }
 
                             break;
                         }
@@ -173,10 +224,14 @@ public class RequestApi {
 
 
 
+                if(result.isEmpty()){
+                    return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
+                }
+
                 return ResponseEntity.ok(result);
 
             }else{
-                return ApiResult.errorMessage("클론한 지도가 없습니다.", HttpStatus.BAD_REQUEST);
+                return ApiResult.errorMessage("클론한 지도가 없습니다.", HttpStatus.OK);
             }
 
         }else{

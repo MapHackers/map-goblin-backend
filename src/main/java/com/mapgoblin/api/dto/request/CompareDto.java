@@ -13,6 +13,8 @@ public class CompareDto {
 
     private Long id;
 
+    private Long layerId;
+
     private String name;
 
     private LocalDateTime createdDate;
