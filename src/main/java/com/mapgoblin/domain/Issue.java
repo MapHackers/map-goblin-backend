@@ -40,6 +40,7 @@ public class Issue extends BaseEntity {
         issue.setContent(content);
         issue.setSpace(space);
         issue.setStatus(IssueStatus.WAITING);
+        issue.setTag(IssueTag.ISSUE);
 
         return issue;
     }
