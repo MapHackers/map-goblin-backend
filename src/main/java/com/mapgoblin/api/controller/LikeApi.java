@@ -49,4 +49,10 @@ public class LikeApi {
 
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/{userId}/{spaceName}/visit")
+    public ResponseEntity<?> addVisit(@PathVariable String userId,@PathVariable String spaceName) {
+        if(!likeService.addVisit(userId, spaceName)) return ApiResult.errorMessage("해당 지도가 없습니다.", HttpStatus.BAD_REQUEST);
+        else return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

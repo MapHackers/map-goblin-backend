@@ -38,6 +38,8 @@ public class Space extends BaseEntity implements Cloneable {
 
     private int dislikeCount;
 
+    private int visitCount;
+
     @OneToMany(mappedBy = "space", orphanRemoval = true)
     private List<SpaceCategory> categories = new ArrayList<>();
 
@@ -64,6 +66,7 @@ public class Space extends BaseEntity implements Cloneable {
         space.setMap(map);
         space.setLikeCount(0);
         space.setDislikeCount(0);
+        space.setVisitCount(0);
 
         return space;
     }
@@ -85,6 +88,7 @@ public class Space extends BaseEntity implements Cloneable {
         space.map = (Map)map.clone();
         space.categories = categoryListCopy(categories, space);
         space.likes = null;
+        space.visitCount = 0;
 
         return space;
     }

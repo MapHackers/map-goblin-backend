@@ -11,6 +11,8 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
 
     Optional<Space> findByHost(Space space);
 
+    Optional<List<Space>> findByName(String name);
+
     Optional<List<Space>> findByNameContaining(String keyword);
 
     Optional<List<Space>> findByDescriptionContaining(String keyword);
