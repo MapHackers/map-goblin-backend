@@ -2,6 +2,7 @@ package com.mapgoblin.service;
 
 import com.mapgoblin.domain.Request;
 import com.mapgoblin.domain.RequestData;
+import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.repository.RequestDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,8 @@ import java.util.List;
 public class RequestDataService {
     private final RequestDataRepository requestDataRepository;
 
-    public RequestData findByMapDataIdAndLayerId(Long mapDataId, Long layerId){
-        return requestDataRepository.findByMapDataIdAndLayerId(mapDataId, layerId).orElse(null);
+    public RequestData findByMapDataIdAndLayerId(Long mapDataId, Long layerId, RequestStatus status){
+        return requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapDataId, layerId, status).orElse(null);
     }
 
     public List<RequestData> findDataByRequest(Request request){
