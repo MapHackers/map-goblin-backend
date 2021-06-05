@@ -40,8 +40,8 @@ public class SpaceApi {
         List<SpaceDto> collect = spaceList.stream()
                 .map(space -> {
                     List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
-
-                    SpaceDto spaceDto = new SpaceDto(space);
+                    Member createMember = memberService.findByUserId(space.getCreatedBy());
+                    SpaceDto spaceDto = new SpaceDto(space, createMember);
 
                     spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
 
@@ -293,7 +293,9 @@ public class SpaceApi {
 
         for(Likes like: spaceIdList){
             Space space = like.getSpace();
-            SpaceDto spaceDto = new SpaceDto(like.getSpace());
+            Member createMember = memberService.findByUserId(space.getCreatedBy());
+
+            SpaceDto spaceDto = new SpaceDto(like.getSpace(), createMember);
             resultSpaceDto.add(spaceDto);
             List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
             spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
@@ -334,8 +336,9 @@ public class SpaceApi {
 
         for(SpaceCategory spaceCategory: spaceCategoryArrayList){
             Space space = spaceCategory.getSpace();
+            Member createMember = memberService.findByUserId(space.getCreatedBy());
 
-            SpaceDto spaceDto = new SpaceDto(space);
+            SpaceDto spaceDto = new SpaceDto(space,createMember);
             resultSpaceDto.add(spaceDto);
             List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
             spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
