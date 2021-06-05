@@ -8,6 +8,7 @@ import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.MemberService;
+import com.mapgoblin.service.RequestDataService;
 import com.mapgoblin.service.RequestService;
 import com.mapgoblin.service.SpaceService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class RequestApi {
     private final RequestService requestService;
     private final SpaceService spaceService;
     private final MemberService memberService;
+    private final RequestDataService requestDataService;
 
     @GetMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName,
@@ -68,6 +70,7 @@ public class RequestApi {
         value.put("title", request.getTitle());
         value.put("content", request.getContent());
         value.put("status", request.getStatus().toString());
+        value.put("createdBy", request.getCreatedBy());
 
         values.add(value);
 
@@ -174,17 +177,21 @@ public class RequestApi {
 
                 for (Layer clonedLayer : clonedLayers) {
                     if(clonedLayer.getHost() == null){
-                        CompareDto compareDto = new CompareDto();
-                        compareDto.setId(clonedLayer.getId());
-                        compareDto.setLayerId(clonedLayer.getId());
-                        compareDto.setName(clonedLayer.getName());
-                        compareDto.setCreatedDate(clonedLayer.getModifiedDate());
+                        RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(null, clonedLayer.getId());
+                        if(findRequestData == null){
+                            CompareDto compareDto = new CompareDto();
+                            compareDto.setId(clonedLayer.getId());
+                            compareDto.setLayerId(clonedLayer.getId());
+                            compareDto.setName(clonedLayer.getName());
+                            compareDto.setCreatedDate(clonedLayer.getModifiedDate());
 
-                        createdLayer.add(compareDto);
+                            createdLayer.add(compareDto);
+                        }
                     }
                 }
 
                 if(!createdLayer.isEmpty()){
+
                     result.put("layer", createdLayer);
                 }
 
@@ -213,15 +220,18 @@ public class RequestApi {
 
                             hostGeom.forEach((s, mapData) -> {
                                 if(!cloneGeom.containsKey(s)){
-                                    CompareDto compareDto = new CompareDto();
-                                    compareDto.setId(mapData.getId());
-                                    compareDto.setLayerId(hostLayer.getId());
-                                    compareDto.setName(mapData.getName());
-                                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
+                                    if(findRequestData == null){
+                                        CompareDto compareDto = new CompareDto();
+                                        compareDto.setId(mapData.getId());
+                                        compareDto.setLayerId(hostLayer.getId());
+                                        compareDto.setName(mapData.getName());
+                                        compareDto.setCreatedDate(mapData.getModifiedDate());
 
-                                    deleteList.add(compareDto);
+                                        deleteList.add(compareDto);
 
-                                    geoms.add(s);
+                                        geoms.add(s);
+                                    }
                                 }
                             });
 
@@ -240,15 +250,18 @@ public class RequestApi {
 
                             cloneGeom.forEach((s, mapData) -> {
                                 if(!hostGeom.containsKey(s)){
-                                    CompareDto compareDto = new CompareDto();
-                                    compareDto.setId(mapData.getId());
-                                    compareDto.setLayerId(hostLayer.getId());
-                                    compareDto.setName(mapData.getName());
-                                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
+                                    if(findRequestData == null){
+                                        CompareDto compareDto = new CompareDto();
+                                        compareDto.setId(mapData.getId());
+                                        compareDto.setLayerId(hostLayer.getId());
+                                        compareDto.setName(mapData.getName());
+                                        compareDto.setCreatedDate(mapData.getModifiedDate());
 
-                                    addedList.add(compareDto);
+                                        addedList.add(compareDto);
 
-                                    geoms.add(s);
+                                        geoms.add(s);
+                                    }
                                 }
                             });
 
@@ -267,13 +280,16 @@ public class RequestApi {
                                 MapData hostData = hostGeom.get(s);
 
                                 if(!mapData.equals(hostData)){
-                                    CompareDto compareDto = new CompareDto();
-                                    compareDto.setId(mapData.getId());
-                                    compareDto.setLayerId(hostLayer.getId());
-                                    compareDto.setName(mapData.getName());
-                                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
+                                    if(findRequestData == null){
+                                        CompareDto compareDto = new CompareDto();
+                                        compareDto.setId(mapData.getId());
+                                        compareDto.setLayerId(hostLayer.getId());
+                                        compareDto.setName(mapData.getName());
+                                        compareDto.setCreatedDate(mapData.getModifiedDate());
 
-                                    modifiedList.add(compareDto);
+                                        modifiedList.add(compareDto);
+                                    }
                                 }
                             });
 
