@@ -52,7 +52,9 @@ public class RequestService {
                 RequestData requestData = RequestData.create(Long.parseLong(addedData.get("id")),
                         Long.parseLong(addedData.get("layerId")),
                         addedData.get("name"),
-                        LocalDateTime.parse(addedData.get("createdDate")), RequestAction.INSERT);
+                        LocalDateTime.parse(addedData.get("createdDate")),
+                        addedData.get("geometry"),
+                        RequestAction.INSERT);
 
                 request.addRequestData(requestData);
 
@@ -67,7 +69,9 @@ public class RequestService {
                 RequestData requestData = RequestData.create(Long.parseLong(modifiedData.get("id")),
                         Long.parseLong(modifiedData.get("layerId")),
                         modifiedData.get("name"),
-                        LocalDateTime.parse(modifiedData.get("createdDate")), RequestAction.UPDATE);
+                        LocalDateTime.parse(modifiedData.get("createdDate")),
+                        modifiedData.get("geometry"),
+                        RequestAction.UPDATE);
 
                 request.addRequestData(requestData);
 
@@ -82,7 +86,9 @@ public class RequestService {
                 RequestData requestData = RequestData.create(Long.parseLong(deleteData.get("id")),
                         Long.parseLong(deleteData.get("layerId")),
                         deleteData.get("name"),
-                        LocalDateTime.parse(deleteData.get("createdDate")), RequestAction.DELETE);
+                        LocalDateTime.parse(deleteData.get("createdDate")),
+                        deleteData.get("geometry"),
+                        RequestAction.DELETE);
 
                 request.addRequestData(requestData);
 
@@ -97,7 +103,9 @@ public class RequestService {
                 RequestData requestData = RequestData.create(null,
                         Long.parseLong(layerData.get("layerId")),
                         layerData.get("name"),
-                        LocalDateTime.parse(layerData.get("createdDate")), RequestAction.INSERT);
+                        LocalDateTime.parse(layerData.get("createdDate")),
+                        layerData.get("geometry"),
+                        RequestAction.INSERT);
 
                 request.addRequestData(requestData);
 
