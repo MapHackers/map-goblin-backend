@@ -5,13 +5,11 @@ import com.mapgoblin.api.dto.request.CompareDto;
 import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
+import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.domain.mapdata.MapData;
-import com.mapgoblin.service.MemberService;
-import com.mapgoblin.service.RequestDataService;
-import com.mapgoblin.service.RequestService;
-import com.mapgoblin.service.SpaceService;
+import com.mapgoblin.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +32,7 @@ public class RequestApi {
     private final SpaceService spaceService;
     private final MemberService memberService;
     private final RequestDataService requestDataService;
+    private final AlarmService alarmService;
 
     @GetMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
@@ -107,6 +106,10 @@ public class RequestApi {
 
             HashMap<String, String> data = new HashMap<>();
 
+            data.put("mapDataId", requestData.getMapDataId().toString());
+            data.put("layerId", requestData.getLayerId().toString());
+            data.put("geometry", requestData.getGeometry());
+            data.put("action", requestData.getAction().toString());
             data.put("name", requestData.getName());
             data.put("createdDate", requestData.getCreateDate().toString());
 
@@ -164,6 +167,8 @@ public class RequestApi {
 
             result.put("requestId", requestService.save(request1, request));
 
+            alarmService.save(findSpace.getId(), AlarmType.REQUEST);
+
             return ResponseEntity.ok(result);
 
         }else{
@@ -204,6 +209,7 @@ public class RequestApi {
                             compareDto.setLayerId(clonedLayer.getId());
                             compareDto.setName(clonedLayer.getName());
                             compareDto.setCreatedDate(clonedLayer.getModifiedDate());
+                            compareDto.setGeometry(null);
 
                             createdLayer.add(compareDto);
                         }
@@ -247,9 +253,12 @@ public class RequestApi {
                                         compareDto.setLayerId(hostLayer.getId());
                                         compareDto.setName(mapData.getName());
                                         compareDto.setCreatedDate(mapData.getModifiedDate());
+                                        compareDto.setGeometry(s);
 
                                         deleteList.add(compareDto);
 
+                                        geoms.add(s);
+                                    }else{
                                         geoms.add(s);
                                     }
                                 }
@@ -277,9 +286,12 @@ public class RequestApi {
                                         compareDto.setLayerId(hostLayer.getId());
                                         compareDto.setName(mapData.getName());
                                         compareDto.setCreatedDate(mapData.getModifiedDate());
+                                        compareDto.setGeometry(s);
 
                                         addedList.add(compareDto);
 
+                                        geoms.add(s);
+                                    }else{
                                         geoms.add(s);
                                     }
                                 }
@@ -299,9 +311,6 @@ public class RequestApi {
                             cloneGeom.forEach((s, mapData) -> {
                                 MapData hostData = hostGeom.get(s);
 
-                                System.out.println("*******************************");
-                                System.out.println(hostData);
-
                                 if(!mapData.equals(hostData)){
                                     RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
                                     if(findRequestData == null){
@@ -310,6 +319,7 @@ public class RequestApi {
                                         compareDto.setLayerId(hostLayer.getId());
                                         compareDto.setName(mapData.getName());
                                         compareDto.setCreatedDate(mapData.getModifiedDate());
+                                        compareDto.setGeometry(s);
 
                                         modifiedList.add(compareDto);
                                     }

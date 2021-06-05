@@ -19,4 +19,6 @@ public class CompareDto {
 
     private LocalDateTime createdDate;
 
+    private String geometry;
+
 }

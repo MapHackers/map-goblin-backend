@@ -32,18 +32,21 @@ public class RequestData {
 
     private LocalDateTime createDate;
 
+    private String geometry;
+
     @Enumerated(EnumType.STRING)
     private RequestAction action;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    public static RequestData create(Long mapDataId, Long layerId, String name, LocalDateTime createDate, RequestAction action){
+    public static RequestData create(Long mapDataId, Long layerId, String name, LocalDateTime createDate, String geometry, RequestAction action){
         RequestData requestData = new RequestData();
         requestData.setMapDataId(mapDataId);
         requestData.setLayerId(layerId);
         requestData.setName(name);
         requestData.setCreateDate(createDate);
+        requestData.setGeometry(geometry);
         requestData.setAction(action);
         requestData.setStatus(RequestStatus.WAITING);
 
