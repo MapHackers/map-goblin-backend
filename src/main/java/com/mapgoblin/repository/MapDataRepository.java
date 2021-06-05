@@ -1,5 +1,6 @@
 package com.mapgoblin.repository;
 
+import com.mapgoblin.domain.Layer;
 import com.mapgoblin.domain.mapdata.MapData;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,5 +11,5 @@ public interface MapDataRepository extends JpaRepository<MapData, Long> {
 
     Optional<List<MapData>> findByLayerId(Long layerId);
 
-    Optional<MapData> findByGeometry(String geom);
+    Optional<MapData> findByGeometryAndLayer(String geom, Layer layer);
 }

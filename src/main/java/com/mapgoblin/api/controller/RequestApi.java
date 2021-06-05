@@ -197,8 +197,8 @@ public class RequestApi {
 
                 for (Layer clonedLayer : clonedLayers) {
                     if(clonedLayer.getHost() == null){
-                        RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(null, clonedLayer.getId());
-                        if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
+                        RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(null, clonedLayer.getId(), RequestStatus.WAITING);
+                        if(findRequestData == null){
                             CompareDto compareDto = new CompareDto();
                             compareDto.setId(clonedLayer.getId());
                             compareDto.setLayerId(clonedLayer.getId());
@@ -240,8 +240,8 @@ public class RequestApi {
 
                             hostGeom.forEach((s, mapData) -> {
                                 if(!cloneGeom.containsKey(s)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
+                                    if(findRequestData == null){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());
@@ -270,8 +270,8 @@ public class RequestApi {
 
                             cloneGeom.forEach((s, mapData) -> {
                                 if(!hostGeom.containsKey(s)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
+                                    if(findRequestData == null){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());
@@ -299,9 +299,12 @@ public class RequestApi {
                             cloneGeom.forEach((s, mapData) -> {
                                 MapData hostData = hostGeom.get(s);
 
+                                System.out.println("*******************************");
+                                System.out.println(hostData);
+
                                 if(!mapData.equals(hostData)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
+                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
+                                    if(findRequestData == null){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());

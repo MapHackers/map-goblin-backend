@@ -123,7 +123,6 @@ public class RequestService {
 
     @Transactional
     public void merger(Long spaceId, Long requestId) throws CloneNotSupportedException {
-
         Request findRequest = requestRepository.findById(requestId).orElse(null);
 
         List<RequestData> requestDataList = requestDataRepository.findByRequest(findRequest).orElse(null);
@@ -169,7 +168,7 @@ public class RequestService {
                     MapData clone = (MapData) mapData.clone();
                     targetLayer.addMapData(clone);
 
-                    mapDataRepository.save(mapData);
+                    mapDataRepository.save(clone);
 
                     mapData.getReviews().forEach(review -> {
                         reviewRepository.save(review);
@@ -179,7 +178,7 @@ public class RequestService {
                 //modified
                 MapData modifiedMapData = mapDataRepository.findById(requestData.getMapDataId()).orElse(null);
 
-                MapData originData = mapDataRepository.findByGeometry(modifiedMapData.getGeometry()).orElse(null);
+                MapData originData = mapDataRepository.findByGeometryAndLayer(modifiedMapData.getGeometry(), modifiedMapData.getLayer().getHost()).orElse(null);
 
                 originData.setName(modifiedMapData.getName());
                 originData.setDescription(modifiedMapData.getDescription());
