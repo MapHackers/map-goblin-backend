@@ -56,7 +56,7 @@ public class Layer extends BaseEntity implements Cloneable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         Layer layer = (Layer) super.clone();
         layer.id = null;
         layer.map = null;
