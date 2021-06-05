@@ -6,6 +6,7 @@ import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
+import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.MemberService;
 import com.mapgoblin.service.RequestDataService;
@@ -35,7 +36,7 @@ public class RequestApi {
     private final RequestDataService requestDataService;
 
     @GetMapping("/{userId}/repositories/{repositoryName}/requests")
-    public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName,
+    public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
                                             @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
 
@@ -46,7 +47,7 @@ public class RequestApi {
         if (target.get(0) != null && target.size() == 1){
             Space space = spaceService.findById(target.get(0).getId());
 
-            Page<RequestDto> result = requestService.findRequestsOfSpace(space, pageable);
+            Page<RequestDto> result = requestService.findRequestsOfSpace(space, RequestStatus.valueOf(status), pageable);
 
             return ResponseEntity.ok(result);
 

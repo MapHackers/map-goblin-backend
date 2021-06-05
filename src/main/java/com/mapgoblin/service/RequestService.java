@@ -5,6 +5,7 @@ import com.mapgoblin.domain.Request;
 import com.mapgoblin.domain.RequestData;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.RequestAction;
+import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.repository.RequestDataRepository;
 import com.mapgoblin.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,9 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final RequestDataRepository requestDataRepository;
 
-    public Page<RequestDto> findRequestsOfSpace(Space space, Pageable pageable) {
+    public Page<RequestDto> findRequestsOfSpace(Space space, RequestStatus status, Pageable pageable) {
 
-        Page<Request> requests = requestRepository.findBySpace(space, pageable);
+        Page<Request> requests = requestRepository.findBySpaceAndStatus(space, status, pageable);
 
         return requests.map(RequestDto::new);
     }
