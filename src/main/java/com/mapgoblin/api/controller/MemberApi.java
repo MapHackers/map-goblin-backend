@@ -47,8 +47,8 @@ public class MemberApi {
         List<SpaceDto> mapList = spacesOfMember.stream()
                 .map(memberSpace -> {
                     Space space = memberSpace.getSpace();
-
-                    SpaceDto spaceDto = new SpaceDto(memberSpace.getSpace());
+                    Member createMember = memberService.findByUserId(space.getCreatedBy());
+                    SpaceDto spaceDto = new SpaceDto(memberSpace.getSpace(), createMember);
 
                     Likes alreadyLike = likeService.isAlreadyLike(findMember, space);
 
