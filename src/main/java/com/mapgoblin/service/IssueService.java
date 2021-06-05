@@ -5,6 +5,7 @@ import com.mapgoblin.api.dto.issue.GetIssueResponse;
 import com.mapgoblin.domain.Issue;
 import com.mapgoblin.domain.Space;
 import com.mapgoblin.domain.base.IssueStatus;
+import com.mapgoblin.domain.base.IssueTag;
 import com.mapgoblin.repository.IssueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,5 +45,20 @@ public class IssueService {
         }
 
         return null;
+    }
+
+    public Issue findIssueById(Long id){
+        return issueRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public boolean setChecked(Long id){
+        Issue issue = issueRepository.findById(id).orElse(null);
+        if (issue == null) return false;
+        else{
+            issue.setStatus(IssueStatus.CHECKED);
+            issue.setTag(IssueTag.OK);
+            return true;
+        }
     }
 }

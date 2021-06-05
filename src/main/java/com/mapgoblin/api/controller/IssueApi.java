@@ -103,12 +103,20 @@ public class IssueApi {
     @GetMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
     public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
-        GetIssueResponse result = issueService.findById(id);
+        Issue issue = issueService.findIssueById(id);
+        Member member = memberService.findByUserId(issue.getCreatedBy());
+        GetIssueResponse result = new GetIssueResponse(issue, member);
 
         if (result != null){
             return ResponseEntity.ok(result);
         }else{
             return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}/check")
+    public ResponseEntity<?> checkIssue(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
+        if(issueService.setChecked(id)) return new ResponseEntity<>(HttpStatus.OK);
+        else return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
     }
 }

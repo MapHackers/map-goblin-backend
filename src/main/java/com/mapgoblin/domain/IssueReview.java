@@ -22,16 +22,19 @@ public class IssueReview extends BaseEntity {
 
     private String content;
 
+    private String profile;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "issue_id")
     private Issue issue;
 
-    public static IssueReview create(Issue issue, String author, String content) {
+    public static IssueReview create(Issue issue, String author, String content, String profile) {
         IssueReview issueReview = new IssueReview();
 
         issueReview.setIssue(issue);
         issueReview.setAuthor(author);
         issueReview.setContent(content);
+        issueReview.setProfile(profile);
 
         return issueReview;
     }

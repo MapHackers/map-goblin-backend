@@ -24,10 +24,10 @@ public class IssueReviewService {
     public CreateIssueReviewResponse save(CreateIssueReviewRequest request, Long id){
         Issue issue = issueRepository.findById(id).orElse(null);
         assert issue != null;
-        IssueReview issueReview = IssueReview.create(issue, request.getAuthor(), request.getContent());
+        IssueReview issueReview = IssueReview.create(issue, request.getAuthor(), request.getContent(), request.getProfile());
         issueReviewRepository.save(issueReview);
         issue.addIssueReview(issueReview);
-        return new CreateIssueReviewResponse(issueReview.getId(), issueReview.getAuthor(), issueReview.getContent(), issueReview.getCreatedDate());
+        return new CreateIssueReviewResponse(issueReview.getId(), issueReview.getAuthor(), issueReview.getContent(), issueReview.getProfile(), issueReview.getCreatedDate());
     }
 
     public List<IssueReview> findByIssueId(Long id) {

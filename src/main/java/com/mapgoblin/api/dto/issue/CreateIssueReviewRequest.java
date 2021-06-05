@@ -11,4 +11,6 @@ public class CreateIssueReviewRequest {
     private String author;
 
     private String content;
+
+    private String profile;
 }

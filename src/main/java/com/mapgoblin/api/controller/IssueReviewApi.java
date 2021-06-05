@@ -22,21 +22,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class IssueReviewApi {
     private final IssueReviewService issueReviewService;
-    private final IssueService issueService;
-    private final MemberService memberService;
 
     @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
     public ResponseEntity<?> create(@RequestBody CreateIssueReviewRequest request, @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
         return ResponseEntity.ok(issueReviewService.save(request, id));
-    }
-
-    @GetMapping("/{userId}/repositories/{repositoryName}/issues/{id}/reviews")
-    public ResponseEntity<?> getIssueReviewList(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
-        List<IssueReview> issueReviewList = issueReviewService.findByIssueId(id);
-        List<CreateIssueReviewResponse> collect = issueReviewList.stream()
-                .map(issueReview -> new CreateIssueReviewResponse(issueReview.getId(),issueReview.getAuthor(),issueReview.getContent(),issueReview.getCreatedDate()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(new ApiResult(collect));
     }
 }
