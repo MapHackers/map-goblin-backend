@@ -149,6 +149,8 @@ public class RequestService {
                                 reviewRepository.save(review);
                             });
                         });
+
+                        layer.setHost(clone);
                     }
                 }else{
                     //added
