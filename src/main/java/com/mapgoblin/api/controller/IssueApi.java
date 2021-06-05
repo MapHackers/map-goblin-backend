@@ -110,6 +110,5 @@ public class IssueApi {
         }else{
             return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
         }
-
     }
 }

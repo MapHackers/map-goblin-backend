@@ -37,7 +37,7 @@ public class Issue extends BaseEntity {
     private IssueTag tag;
 
     @OneToMany(mappedBy = "issue", orphanRemoval = true)
-    private List<IssueReply> replies = new ArrayList<>();
+    private List<IssueReview> issueReviewList = new ArrayList<>();
 
     public static Issue create(String title, String content, Space space) {
         Issue issue = new Issue();
@@ -51,8 +51,8 @@ public class Issue extends BaseEntity {
         return issue;
     }
 
-    public void addReply(IssueReply reply){
-        replies.add(reply);
-        reply.setIssue(this);
+    public void addIssueReview(IssueReview issueReview) {
+        this.issueReviewList.add(issueReview);
+        issueReview.setIssue(this);
     }
 }

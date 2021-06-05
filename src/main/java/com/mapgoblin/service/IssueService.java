@@ -26,7 +26,7 @@ public class IssueService {
     public CreateIssueResponse save(Issue issue) {
         issueRepository.save(issue);
 
-        return new CreateIssueResponse(issue.getTitle(), issue.getContent(),
+        return new CreateIssueResponse(issue.getId(), issue.getTitle(), issue.getContent(),
                 issue.getStatus(), issue.getCreatedDate(), issue.getCreatedBy());
     }
 
