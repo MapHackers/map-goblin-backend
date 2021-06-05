@@ -103,6 +103,28 @@ public class MapApi {
     }
 
     /**
+     * Update MapData
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/update")
+    public ResponseEntity<?> update(@RequestBody CreateMapDataRequest request){
+        Map map = mapService.findByMapId(request.getMapId());
+        Layer layer = layerService.findByLayerNameAndMapId(request.getLayerName(), request.getMapId());
+        if (map == null || layer == null){
+            // 업데이트 요청이 유호하지 않은 맵 또는 레이어의 데이터일때
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if(request.getMapDataType().equals("point")){
+            Point point = pointService.findByGeometryAndLayerId(request.getGeometry(), layer.getId());
+            pointService.modify(point.getId(), request);
+        }
+        return ResponseEntity.ok("ok");
+
+    }
+
+    /**
      * Get MapData Layer
      *
      * @param

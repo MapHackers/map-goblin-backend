@@ -1,5 +1,6 @@
 package com.mapgoblin.service;
 
+import com.mapgoblin.api.dto.map.CreateMapDataRequest;
 import com.mapgoblin.domain.mapdata.Point;
 import com.mapgoblin.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,14 @@ public class PointService {
     public Point findByGeometryAndLayerId(String geometry, Long LayerId){
         return pointRepository.findByGeometryAndLayerId(geometry, LayerId)
                 .orElse(null);
+    }
+
+    @Transactional
+    public void modify(Long pointId, CreateMapDataRequest request){
+        Point findPoint = pointRepository.findById(pointId).orElse(null);
+
+        findPoint.setName(request.getTitle());
+        findPoint.setDescription(request.getDescription());
     }
 
     public void delete(Point point){
