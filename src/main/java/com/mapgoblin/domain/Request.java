@@ -40,6 +40,9 @@ public class Request extends BaseEntity {
     @OneToMany(mappedBy = "request")
     private List<RequestData> requestDataList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "request")
+    private List<RequestReply> replies = new ArrayList<>();
+
     public static Request create(String title, String content, Space space){
         Request request = new Request();
         request.setTitle(title);
@@ -54,5 +57,10 @@ public class Request extends BaseEntity {
     public void addRequestData(RequestData requestData) {
         requestDataList.add(requestData);
         requestData.setRequest(this);
+    }
+
+    public void addReply(RequestReply reply) {
+        replies.add(reply);
+        reply.setRequest(this);
     }
 }

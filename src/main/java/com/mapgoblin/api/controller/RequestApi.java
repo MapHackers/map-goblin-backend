@@ -44,7 +44,7 @@ public class RequestApi {
 
         List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.get(0) != null && target.size() == 1){
+        if (target.size() == 1 && target.get(0) != null){
             Space space = spaceService.findById(target.get(0).getId());
 
             Page<RequestDto> result = requestService.findRequestsOfSpace(space, RequestStatus.valueOf(status), pageable);
@@ -76,6 +76,25 @@ public class RequestApi {
         values.add(value);
 
         result.put("values", values);
+
+        // 댓글
+        List<HashMap<String, String>> replies = new ArrayList<>();
+
+        List<RequestReply> findReplies = requestService.findRepliesByRequest(request);
+
+        for (RequestReply findReply : findReplies) {
+            HashMap<String, String> replyData = new HashMap<>();
+
+            replyData.put("author", findReply.getCreatedBy());
+            replyData.put("content", findReply.getContent());
+            replyData.put("datetime", findReply.getCreatedDate().toString());
+
+            replies.add(replyData);
+        }
+
+        if(!replies.isEmpty()){
+            result.put("replies", replies);
+        }
 
         // request data
         List<RequestData> requestDataList = request.getRequestDataList();
@@ -179,7 +198,7 @@ public class RequestApi {
                 for (Layer clonedLayer : clonedLayers) {
                     if(clonedLayer.getHost() == null){
                         RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(null, clonedLayer.getId());
-                        if(findRequestData == null){
+                        if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
                             CompareDto compareDto = new CompareDto();
                             compareDto.setId(clonedLayer.getId());
                             compareDto.setLayerId(clonedLayer.getId());
@@ -222,7 +241,7 @@ public class RequestApi {
                             hostGeom.forEach((s, mapData) -> {
                                 if(!cloneGeom.containsKey(s)){
                                     RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null){
+                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());
@@ -252,7 +271,7 @@ public class RequestApi {
                             cloneGeom.forEach((s, mapData) -> {
                                 if(!hostGeom.containsKey(s)){
                                     RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null){
+                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());
@@ -282,7 +301,7 @@ public class RequestApi {
 
                                 if(!mapData.equals(hostData)){
                                     RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId());
-                                    if(findRequestData == null){
+                                    if(findRequestData == null || findRequestData.getStatus() == RequestStatus.DENIED){
                                         CompareDto compareDto = new CompareDto();
                                         compareDto.setId(mapData.getId());
                                         compareDto.setLayerId(hostLayer.getId());
@@ -318,4 +337,49 @@ public class RequestApi {
         }
     }
 
+    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
+    public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
+                                         @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+
+        HashMap<String, String> result = new HashMap<>();
+
+        Request findRequest = requestService.findById(requestId);
+
+        RequestReply reply = RequestReply.create(request.get("content"));
+
+        findRequest.addReply(reply);
+
+        RequestReply saved = requestService.replySave(reply);
+
+        result.put("author", saved.getCreatedBy());
+        result.put("content", saved.getContent());
+        result.put("datetime", saved.getCreatedDate().toString());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/merge")
+    public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId) throws CloneNotSupportedException {
+
+        Member findMember = memberService.findByUserId(userId);
+
+        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+
+        if (target.size() == 1 && target.get(0) != null){
+
+            requestService.merger(target.get(0).getId(), requestId);
+
+            return ResponseEntity.ok("merge");
+        }else{
+            return ApiResult.errorMessage("존재하지 않는 지도입니다.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/denied")
+    public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+
+        requestService.denied(requestId);
+
+        return ResponseEntity.ok("denied");
+    }
 }

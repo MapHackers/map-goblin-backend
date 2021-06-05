@@ -1,6 +1,7 @@
 package com.mapgoblin.domain;
 
 import com.mapgoblin.domain.base.RequestAction;
+import com.mapgoblin.domain.base.RequestStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,6 +35,9 @@ public class RequestData {
     @Enumerated(EnumType.STRING)
     private RequestAction action;
 
+    @Enumerated(EnumType.STRING)
+    private RequestStatus status;
+
     public static RequestData create(Long mapDataId, Long layerId, String name, LocalDateTime createDate, RequestAction action){
         RequestData requestData = new RequestData();
         requestData.setMapDataId(mapDataId);
@@ -41,6 +45,7 @@ public class RequestData {
         requestData.setName(name);
         requestData.setCreateDate(createDate);
         requestData.setAction(action);
+        requestData.setStatus(RequestStatus.WAITING);
 
         return requestData;
     }

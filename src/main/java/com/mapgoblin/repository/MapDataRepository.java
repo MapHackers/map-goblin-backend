@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface MapDataRepository extends JpaRepository<MapData, Long> {
 
     Optional<List<MapData>> findByLayerId(Long layerId);
+
+    Optional<MapData> findByGeometry(String geom);
 }
