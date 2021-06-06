@@ -37,13 +37,12 @@ public class MapApi {
      */
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateMapDataRequest request) {
-
         if(request.getLayerName() == null){
             request.setLayerName("Layer1");
         }
-
         Map map = mapService.findByMapId(request.getMapId());
         Layer layer = layerService.findByLayerNameAndMapId(request.getLayerName(), request.getMapId());
+
 
         if (map == null){
             // 요청해온 map id 가 유효하지 않을경우 오류
