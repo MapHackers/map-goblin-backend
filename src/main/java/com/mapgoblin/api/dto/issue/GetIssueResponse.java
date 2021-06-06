@@ -47,10 +47,11 @@ public class GetIssueResponse {
         this.tag = issue.getTag();
         this.createdBy = issue.getCreatedBy();
         this.createdDate = issue.getCreatedDate();
-        this.issueReviewList = issue.getIssueReviewList().stream()
-                .map(review -> new CreateIssueReviewResponse(review.getId(), review.getAuthor(), review.getContent(), review.getProfile(), review.getCreatedDate()))
-                .collect(Collectors.toList());
+//        this.issueReviewList = issue.getIssueReviewList().stream()
+//                .map(review -> new CreateIssueReviewResponse(review.getId(), review.getAuthor(), review.getContent(), review.getProfile(), review.getCreatedDate()))
+//                .collect(Collectors.toList());
     }
+
     public GetIssueResponse(Issue issue, Member member) {
         this.id = issue.getId();
         this.title = issue.getTitle();
@@ -61,8 +62,8 @@ public class GetIssueResponse {
         this.createdDate = issue.getCreatedDate();
         this.authorName = member.getName();
         this.authorProfile = member.getProfile();
-        this.issueReviewList = issue.getIssueReviewList().stream()
-                .map(review -> new CreateIssueReviewResponse(review.getId(), review.getAuthor(), review.getContent(), review.getProfile(), review.getCreatedDate()))
-                .collect(Collectors.toList());
+//        this.issueReviewList = issue.getIssueReviewList().stream()
+//                .map(review -> new CreateIssueReviewResponse(review.getId(), review.getAuthor(), review.getContent(), review.getProfile(), review.getCreatedDate()))
+//                .collect(Collectors.toList());
     }
 }

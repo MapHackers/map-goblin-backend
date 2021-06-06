@@ -22,10 +22,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class IssueReviewApi {
     private final IssueReviewService issueReviewService;
+    private final MemberService memberService;
 
     @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
     public ResponseEntity<?> create(@RequestBody CreateIssueReviewRequest request, @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
-        return ResponseEntity.ok(issueReviewService.save(request, id));
+        Member findMember = memberService.findByUserId(userId);
+
+        CreateIssueReviewResponse createIssueReviewResponse = issueReviewService.save(request, id);
+
+        createIssueReviewResponse.setAuthor(findMember.getName());
+        createIssueReviewResponse.setProfile(findMember.getProfile());
+
+        return ResponseEntity.ok(createIssueReviewResponse);
     }
 }
