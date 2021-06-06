@@ -37,10 +37,10 @@ public class Request extends BaseEntity {
     @JoinColumn(name = "space_id")
     private Space space;
 
-    @OneToMany(mappedBy = "request")
+    @OneToMany(mappedBy = "request", orphanRemoval = true)
     private List<RequestData> requestDataList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "request")
+    @OneToMany(mappedBy = "request", orphanRemoval = true)
     private List<RequestReply> replies = new ArrayList<>();
 
     public static Request create(String title, String content, Space space){

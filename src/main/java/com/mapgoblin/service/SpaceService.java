@@ -31,6 +31,7 @@ public class SpaceService {
     private final SpaceCategoryRepository spaceCategoryRepository;
     private final AlarmRepository alarmRepository;
     private final IssueRepository issueRepository;
+    private final RequestRepository requestRepository;
 
     /**
      * Find all repositories
@@ -238,6 +239,10 @@ public class SpaceService {
     @Transactional
     public void delete(Space space){
 
+        List<Request> requests = requestRepository.findBySpace(space).orElse(null);
+
+        requests.forEach(requestRepository::delete);
+
         List<Issue> findIssues = issueRepository.findBySpace(space).orElse(null);
 
         findIssues.forEach(issueRepository::delete);
@@ -246,9 +251,15 @@ public class SpaceService {
 
         byDstSpace.forEach(alarmRepository::delete);
 
-        List<SpaceCategory> findSpaceCategories = spaceCategoryRepository.findBySpace(space).orElse(null);
+        List<Layer> layers = space.getMap().getLayers();
 
-        findSpaceCategories.forEach(spaceCategoryRepository::delete);
+        for (Layer layer : layers) {
+            List<Layer> clonedLayers = layerRepository.findByHost(layer).orElse(null);
+
+            for (Layer clonedLayer : clonedLayers) {
+                clonedLayer.setHost(null);
+            }
+        }
 
         List<MemberSpace> findMemberSpaces = memberSpaceRepository.findBySpace(space).orElse(null);
 
