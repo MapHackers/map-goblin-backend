@@ -319,6 +319,23 @@ public class SpaceApi {
      */
     @GetMapping("/{categoryName}/repositories/category")
     public ResponseEntity<?> findByCategory(@PathVariable String categoryName, @AuthenticationPrincipal Member member){
+        switch (categoryName){
+            case "univ":
+                categoryName = "대학교";
+                break;
+            case "seoul":
+                categoryName = "서울";
+                break;
+            case "info":
+                categoryName = "정보전달";
+                break;
+            case "rest":
+                categoryName = "맛집";
+                break;
+            default:
+                break;
+        }
+
         List<Category> categoryList = categoryService.findByName(categoryName);
 
         if(categoryList == null){
