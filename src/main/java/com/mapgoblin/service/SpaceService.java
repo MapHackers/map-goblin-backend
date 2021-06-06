@@ -214,23 +214,25 @@ public class SpaceService {
         findSpace.setOneWord(request.getOneWord());
 
         for (SpaceCategory category : findSpace.getCategories()) {
-            categoryRepository.delete(category.getCategory());
             spaceCategoryRepository.delete(category);
         }
 
         for (String newCategory : request.getCategories()) {
             SpaceCategory spaceCategory = new SpaceCategory();
 
-            Category myCategory = Category.createCategory(newCategory);
+            Category myCategory = categoryRepository.findByName(newCategory).orElse(null);
 
-            categoryRepository.save(myCategory);
+            if(myCategory == null){
+                myCategory = Category.createCategory(newCategory);
+
+                categoryRepository.save(myCategory);
+            }
 
             myCategory.addSpaceCategory(spaceCategory);
 
             findSpace.addCategory(spaceCategory);
 
             spaceCategoryRepository.save(spaceCategory);
-
         }
     }
 
