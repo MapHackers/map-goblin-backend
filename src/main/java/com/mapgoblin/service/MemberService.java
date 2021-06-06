@@ -99,7 +99,13 @@ public class MemberService implements UserDetailsService {
         if (member != null){
             member.setName(userName);
             member.setDescription(description);
-            member.setProfile(profile);
+            if(profile != null){
+                if(profile.equals("profileDelete")){
+                    member.setProfile(null);
+                }else{
+                    member.setProfile(profile);
+                }
+            }
             return new EditProfileResponse(member.getUserId(),member.getName(), member.getDescription(), member.getProfile());
         }
         else{

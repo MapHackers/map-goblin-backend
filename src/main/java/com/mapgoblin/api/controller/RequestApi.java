@@ -84,8 +84,12 @@ public class RequestApi {
         for (RequestReply findReply : findReplies) {
             HashMap<String, String> replyData = new HashMap<>();
 
+            Member replyMember = memberService.findByUserId(findReply.getCreatedBy());
+
             replyData.put("author", findReply.getCreatedBy());
             replyData.put("content", findReply.getContent());
+            replyData.put("name", replyMember.getName());
+            replyData.put("profile", replyMember.getProfile());
             replyData.put("datetime", findReply.getCreatedDate().toString());
 
             replies.add(replyData);
@@ -364,8 +368,12 @@ public class RequestApi {
 
         RequestReply saved = requestService.replySave(reply);
 
+        Member findMember = memberService.findByUserId(userId);
+
         result.put("author", saved.getCreatedBy());
         result.put("content", saved.getContent());
+        result.put("name", findMember.getName());
+        result.put("profile", findMember.getProfile());
         result.put("datetime", saved.getCreatedDate().toString());
 
         return ResponseEntity.ok(result);
