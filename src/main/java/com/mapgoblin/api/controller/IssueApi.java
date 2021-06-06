@@ -76,7 +76,7 @@ public class IssueApi {
 
         List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.get(0) != null && target.size() == 1) {
+        if (target.size() == 1 && target.get(0) != null) {
             Space space = spaceService.findById(target.get(0).getId());
 
             Page<GetIssueResponse> result = issueService.findBySpace(space, IssueStatus.valueOf(status), pageable);
