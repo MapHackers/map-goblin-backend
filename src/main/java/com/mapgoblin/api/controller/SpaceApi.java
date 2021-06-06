@@ -349,4 +349,26 @@ public class SpaceApi {
 
         return ResponseEntity.ok(new ApiResult<>(resultSpaceDto));
     }
+
+    @GetMapping("/categories")
+    public ResponseEntity<?> getCategories(){
+
+        List<HashMap<String, String>> result = new ArrayList<>();
+
+        List<Category> categories = categoryService.findAll();
+
+        if(categories != null){
+            for (Category category : categories) {
+                HashMap<String, String> categoryInfo = new HashMap<>();
+
+                categoryInfo.put("value", category.getName());
+
+                result.add(categoryInfo);
+            }
+
+            return ResponseEntity.ok(result);
+        }else{
+            return ApiResult.errorMessage("카테고리 목록이 없습니다.", HttpStatus.OK);
+        }
+    }
 }
