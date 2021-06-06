@@ -178,8 +178,6 @@ public class SpaceService {
             });
 
             copySpace.getCategories().forEach(spaceCategory -> {
-                categoryRepository.save(spaceCategory.getCategory());
-
                 spaceCategoryRepository.save(spaceCategory);
             });
 
