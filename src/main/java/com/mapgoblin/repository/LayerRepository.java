@@ -12,5 +12,7 @@ public interface LayerRepository extends JpaRepository<Layer, Long> {
     Optional<Layer> findByNameAndMapId(String layerNAme, Long mapId);
     Optional<List<Layer>> findByMapId(Long mapId);
 
+    Optional<List<Layer>> findByHost(Layer layer);
+
 
 }
