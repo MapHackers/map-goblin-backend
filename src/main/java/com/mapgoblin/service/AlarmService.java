@@ -131,4 +131,15 @@ public class AlarmService {
         });
         return alarmList;
     }
+
+    @Transactional
+    public void createAlarm(String userId, Long spaceId, AlarmType alarmType){
+        Member member = memberRepository.findByUserId(userId).orElse(null);
+        Space findSpace = spaceRepository.findById(spaceId).orElse(null);
+
+        Alarm alarm = Alarm.createAlarm(findSpace, alarmType);
+        member.addAlarm(alarm);
+
+        alarmRepository.save(alarm);
+    }
 }

@@ -56,16 +56,6 @@ public class IssueService {
         return result;
     }
 
-//    public GetIssueResponse findById(Long id){
-//        Issue issue = issueRepository.findById(id).orElse(null);
-//
-//        if (issue != null) {
-//            return new GetIssueResponse(issue);
-//        }
-//
-//        return null;
-//    }
-
     public Issue findIssueById(Long id){
         return issueRepository.findById(id).orElse(null);
     }
