@@ -319,39 +319,17 @@ public class SpaceApi {
      */
     @GetMapping("/{categoryName}/repositories/category")
     public ResponseEntity<?> findByCategory(@PathVariable String categoryName, @AuthenticationPrincipal Member member){
-        switch (categoryName){
-            case "univ":
-                categoryName = "대학교";
-                break;
-            case "seoul":
-                categoryName = "서울";
-                break;
-            case "info":
-                categoryName = "정보전달";
-                break;
-            case "rest":
-                categoryName = "맛집";
-                break;
-            default:
-                break;
-        }
+        Category findCategory = categoryService.findByName(categoryName);
 
-        List<Category> categoryList = categoryService.findByName(categoryName);
-
-        if(categoryList == null){
+        if(findCategory == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        ArrayList<SpaceCategory> spaceCategoryArrayList = new ArrayList<>();
-
-        for(Category category: categoryList){
-            SpaceCategory spaceCategory = spaceCategoryService.findByCategoryId(category.getId());
-            spaceCategoryArrayList.add(spaceCategory);
-        }
+        List<SpaceCategory> spaceCategoryList = spaceCategoryService.findByCategoryId(findCategory.getId());
 
         ArrayList<SpaceDto> resultSpaceDto = new ArrayList<>();
 
-        for(SpaceCategory spaceCategory: spaceCategoryArrayList){
+        for(SpaceCategory spaceCategory: spaceCategoryList){
             Space space = spaceCategory.getSpace();
             Member createMember = memberService.findByUserId(space.getCreatedBy());
 

@@ -103,14 +103,20 @@ public class SpaceService {
 
             Space space = Space.createSpace(request.getName(), request.getThumbnail(), request.getDescription(), map);
 
+            spaceRepository.save(space);
+
             if(request.getCategories() != null){
                 for (String category : request.getCategories()) {
 
                     SpaceCategory spaceCategory = new SpaceCategory();
 
-                    Category myCategory = Category.createCategory(category);
+                    Category myCategory = categoryRepository.findByName(category).orElse(null);
 
-                    categoryRepository.save(myCategory);
+                    if(myCategory == null){
+                        myCategory = Category.createCategory(category);
+
+                        categoryRepository.save(myCategory);
+                    }
 
                     myCategory.addSpaceCategory(spaceCategory);
 
@@ -119,8 +125,6 @@ public class SpaceService {
                     spaceCategoryRepository.save(spaceCategory);
                 }
             }
-
-            spaceRepository.save(space);
 
             MemberSpace memberSpace = MemberSpace.createMemberSpace(space);
 
