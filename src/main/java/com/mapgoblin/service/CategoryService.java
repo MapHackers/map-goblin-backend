@@ -15,7 +15,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<Category> findByName(String name){
+    public Category findByName(String name){
         return categoryRepository.findByName(name)
                 .orElse(null);
     }
