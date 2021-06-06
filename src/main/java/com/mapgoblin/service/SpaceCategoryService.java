@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -13,7 +15,7 @@ public class SpaceCategoryService {
 
     private final SpaceCategoryRepository spaceCategoryRepository;
 
-    public SpaceCategory findByCategoryId(Long id){
+    public List<SpaceCategory> findByCategoryId(Long id){
         return spaceCategoryRepository.findByCategoryId(id)
                 .orElse(null);
     }
