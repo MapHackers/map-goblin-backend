@@ -3,6 +3,7 @@ package com.mapgoblin.api.controller;
 import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.issue.CreateIssueRequest;
 import com.mapgoblin.api.dto.issue.CreateIssueResponse;
+import com.mapgoblin.api.dto.issue.CreateIssueReviewResponse;
 import com.mapgoblin.api.dto.issue.GetIssueResponse;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Issue;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -107,11 +109,16 @@ public class IssueApi {
         Member member = memberService.findByUserId(issue.getCreatedBy());
         GetIssueResponse result = new GetIssueResponse(issue, member);
 
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }else{
-            return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
-        }
+        List<CreateIssueReviewResponse> temp = issue.getIssueReviewList().stream()
+                .map(review -> {
+                    Member findInfo = memberService.findByUserId(review.getAuthor());
+                    return new CreateIssueReviewResponse(review.getId(), findInfo.getName(), review.getContent(), findInfo.getProfile(), review.getCreatedDate());
+                })
+                .collect(Collectors.toList());
+
+        result.setIssueReviewList(temp);
+
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}/check")
