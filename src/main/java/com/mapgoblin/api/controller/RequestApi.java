@@ -393,7 +393,11 @@ public class RequestApi {
 
         if (target.size() == 1 && target.get(0) != null){
 
+            Request findRequest = requestService.findById(requestId);
+
             requestService.merger(target.get(0).getId(), requestId);
+
+            alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_ACCEPTED);
 
             return ResponseEntity.ok("merge");
         }else{
@@ -404,8 +408,22 @@ public class RequestApi {
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/denied")
     public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
-        requestService.denied(requestId);
+        Member findMember = memberService.findByUserId(userId);
 
-        return ResponseEntity.ok("denied");
+        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+
+        if (target.size() == 1 && target.get(0) != null){
+
+            Request findRequest = requestService.findById(requestId);
+
+            requestService.denied(requestId);
+
+            alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_DENIED);
+
+            return ResponseEntity.ok("denied");
+
+        }else{
+            return ApiResult.errorMessage("존재하지 않는 지도입니다.", HttpStatus.BAD_REQUEST);
+        }
     }
 }

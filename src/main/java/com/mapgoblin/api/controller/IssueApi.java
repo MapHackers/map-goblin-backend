@@ -9,7 +9,9 @@ import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.Issue;
 import com.mapgoblin.domain.Member;
 import com.mapgoblin.domain.Space;
+import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.IssueStatus;
+import com.mapgoblin.service.AlarmService;
 import com.mapgoblin.service.IssueService;
 import com.mapgoblin.service.MemberService;
 import com.mapgoblin.service.SpaceService;
@@ -32,6 +34,7 @@ public class IssueApi {
     private final IssueService issueService;
     private final MemberService memberService;
     private final SpaceService spaceService;
+    private final AlarmService alarmService;
 
     /**
      * Create issue
@@ -123,7 +126,23 @@ public class IssueApi {
 
     @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}/check")
     public ResponseEntity<?> checkIssue(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
-        if(issueService.setChecked(id)) return new ResponseEntity<>(HttpStatus.OK);
-        else return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
+        if(issueService.setChecked(id)){
+
+            Member findMember = memberService.findByUserId(userId);
+
+            List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+
+            if (target.size() == 1 && target.get(0) != null){
+                Issue issue = issueService.findIssueById(id);
+
+                alarmService.createAlarm(issue.getCreatedBy(), target.get(0).getId(), AlarmType.ISSUE_OK);
+
+                return new ResponseEntity<>(HttpStatus.OK);
+            }else {
+                return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return ApiResult.errorMessage("존재하지 않는 이슈입니다.", HttpStatus.BAD_REQUEST);
+        }
     }
 }
