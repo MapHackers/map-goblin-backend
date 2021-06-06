@@ -110,7 +110,12 @@ public class RequestApi {
 
             HashMap<String, String> data = new HashMap<>();
 
-            data.put("mapDataId", requestData.getMapDataId().toString());
+            if(requestData.getMapDataId() == null){
+                data.put("mapDataId", null);
+            }else{
+                data.put("mapDataId", requestData.getMapDataId().toString());
+            }
+
             data.put("layerId", requestData.getLayerId().toString());
             data.put("geometry", requestData.getGeometry());
             data.put("action", requestData.getAction().toString());
