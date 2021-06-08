@@ -8,6 +8,7 @@ import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
+import com.mapgoblin.domain.base.SourceType;
 import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.*;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class RequestApi {
     private final MemberService memberService;
     private final RequestDataService requestDataService;
     private final AlarmService alarmService;
+    private final MemberSpaceService memberSpaceService;
 
     @GetMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
@@ -356,6 +358,189 @@ public class RequestApi {
 
         }else{
             return ApiResult.errorMessage("존재하지 않는 지도입니다.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/{userId}/repositories/{repositoryName}/pull")
+    public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String repositoryName) throws CloneNotSupportedException {
+
+
+
+
+        return ResponseEntity.ok("");
+    }
+
+    @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
+    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
+
+        HashMap<String, List<CompareDto>> result = new HashMap<>();
+
+        Member findMember = memberService.findByUserId(userId);
+
+        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+
+        if (target.size() == 1 && target.get(0) != null && target.get(0).getSource() == SourceType.CLONE){
+
+            List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
+            Space clonedSpace = spaceService.findById(target.get(0).getId());
+            boolean ownerCheck = true;
+
+            for (MemberSpace memberSpace : spacesOfMember) {
+                if(memberSpace.getSpace() == clonedSpace){
+                    ownerCheck = false;
+                    break;
+                }
+            }
+
+            if(ownerCheck){
+                return ApiResult.errorMessage("주인이 아닙니다.", HttpStatus.OK);
+            }
+
+            Space hostSpace = spaceService.findById(target.get(0).getHostId());
+
+
+            List<Layer> hostLayers = hostSpace.getMap().getLayers();
+            List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
+
+            //새로 생성된 레이어
+            List<CompareDto> createdLayer = new ArrayList<>();
+
+            for (Layer hostLayer : hostLayers) {
+                boolean layerCheck = true;
+
+                for (Layer clonedLayer : clonedLayers) {
+                    if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
+                        layerCheck = false;
+                        break;
+                    }
+                }
+
+                if(layerCheck){
+                    CompareDto compareDto = new CompareDto();
+                    compareDto.setId(hostLayer.getId());
+                    compareDto.setLayerId(hostLayer.getId());
+                    compareDto.setName(hostLayer.getName());
+                    compareDto.setCreatedDate(hostLayer.getModifiedDate());
+                    compareDto.setGeometry(null);
+
+                    createdLayer.add(compareDto);
+                }
+            }
+
+            if(!createdLayer.isEmpty()){
+
+                result.put("layer", createdLayer);
+            }
+
+            for (Layer clonedLayer : clonedLayers) {
+                for (Layer hostLayer : hostLayers) {
+                    if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
+                        List<MapData> hostMapDataList = hostLayer.getMapDataList();
+                        List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
+
+                        //지오메트리 hash
+                        HashMap<String, MapData> hostGeom = new HashMap<>();
+                        HashMap<String, MapData> cloneGeom = new HashMap<>();
+
+                        for (MapData mapData : hostMapDataList) {
+                            hostGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        for (MapData mapData : cloneMapDataList) {
+                            cloneGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        List<String> geoms = new ArrayList<>();
+
+                        // 삭제된 데이터
+                        List<CompareDto> deleteList = new ArrayList<>();
+
+                        cloneGeom.forEach((s, mapData) -> {
+                            if(!hostGeom.containsKey(s)){
+                                CompareDto compareDto = new CompareDto();
+                                compareDto.setId(mapData.getId());
+                                compareDto.setLayerId(clonedLayer.getId());
+                                compareDto.setName(mapData.getName());
+                                compareDto.setCreatedDate(mapData.getModifiedDate());
+                                compareDto.setGeometry(s);
+
+                                deleteList.add(compareDto);
+
+                                geoms.add(s);
+                            }
+                        });
+
+                        for (String geom : geoms) {
+                            hostGeom.remove(geom);
+                        }
+
+                        geoms.clear();
+
+                        if(!deleteList.isEmpty()){
+                            result.put("delete", deleteList);
+                        }
+
+                        //추가된 데이터
+                        List<CompareDto> addedList = new ArrayList<>();
+
+                        hostGeom.forEach((s, mapData) -> {
+                            if(!cloneGeom.containsKey(s)){
+                                CompareDto compareDto = new CompareDto();
+                                compareDto.setId(mapData.getId());
+                                compareDto.setLayerId(clonedLayer.getId());
+                                compareDto.setName(mapData.getName());
+                                compareDto.setCreatedDate(mapData.getModifiedDate());
+                                compareDto.setGeometry(s);
+
+                                addedList.add(compareDto);
+
+                                geoms.add(s);
+                            }
+                        });
+
+                        for (String geom : geoms) {
+                            hostGeom.remove(geom);
+                        }
+
+                        if(!addedList.isEmpty()){
+                            result.put("added", addedList);
+                        }
+
+                        //수정된 데이터
+                        List<CompareDto> modifiedList = new ArrayList<>();
+
+                        hostGeom.forEach((s, mapData) -> {
+                            MapData hostData = cloneGeom.get(s);
+
+                            if(!mapData.equals(hostData)){
+                                CompareDto compareDto = new CompareDto();
+                                compareDto.setId(mapData.getId());
+                                compareDto.setLayerId(clonedLayer.getId());
+                                compareDto.setName(mapData.getName());
+                                compareDto.setCreatedDate(mapData.getModifiedDate());
+                                compareDto.setGeometry(s);
+
+                                modifiedList.add(compareDto);
+                            }
+                        });
+
+                        if(!modifiedList.isEmpty()){
+                            result.put("modified", modifiedList);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            if(result.isEmpty()){
+                return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
+            }
+
+            return ResponseEntity.ok(result);
+
+        }else{
+            return ApiResult.errorMessage("클론한 지도가 없습니다.", HttpStatus.OK);
         }
     }
 
