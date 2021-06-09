@@ -3,10 +3,10 @@ os: linux
 
 files:
   - source: /
-    destination: /mapgoblin
+    destination: home/ubuntu/mapgoblin
 
 permissions:
-  - object: /mapgoblin
+  - object: home/ubuntu/mapgoblin
     owner: ubuntu
     group: ubuntu
     mode: 755
