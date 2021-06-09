@@ -1,0 +1,49 @@
+server:
+  address: localhost
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/mapgoblin
+#    username: mapgoblin
+#    password: mapgoblin
+#    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # generate-ddl: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dydfuf38@gmail.com
+    password: dydfuftq1@
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    # org.hibernate.type: trace
+
+file:
+  upload:
+    location: src/main/resources/thumbnail
