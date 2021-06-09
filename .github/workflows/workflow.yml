@@ -27,5 +27,30 @@ jobs:
       run: ./gradlew test
     - name: run build
       run: ./gradlew clean build -x test
+  
+  CD:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: run build
+      run: ./gradlew bootJar
+    - name: AWS setting
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{secrets.AWS_S3_ID}}
+        aws-secret_access)key: ${{secrets.AWS_S3_KEY}}
+        aws-region: ap-northeast-2
+    - name: upload S3
+      run: aws deploy push --application-name mapgoblin --description "This is a revision for the application mapgoblin" --s3-location s3://mapgoblin-bucket/server/build.zip --source .
+    - name: Code Deploy
+      run: aws deploy create-deployment --application-name mapgoblin --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name mapgoblin --s3-location bucket=mapgoblin-bucket,bundleType=zip,key=server/build.zip
     
     
