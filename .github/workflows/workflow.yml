@@ -46,7 +46,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{secrets.AWS_S3_ID}}
-        aws-secret_access_key: ${{secrets.AWS_S3_KEY}}
+        aws-secret-access-key: ${{secrets.AWS_S3_KEY}}
         aws-region: ap-northeast-2
     - name: upload S3
       run: aws deploy push --application-name mapgoblin --description "This is a revision for the application mapgoblin" --s3-location s3://mapgoblin-bucket/server/build.zip --source .
