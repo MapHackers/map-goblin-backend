@@ -1,6 +1,24 @@
 # 지도깨비(Map-goblin Backend)
-
+<img width='200' src="https://user-images.githubusercontent.com/33109677/121631660-77594900-caba-11eb-8e8d-c2057911ee5c.png">
 <누구나 지도를 커스텀하고 공유할 수 있는 오픈소스 커뮤니티>
+
+
+## 설치 / 빌드
+
+---------------
+```bash
+    $ git clone https://github.com/MapHackers/map-goblin-backend.git
+    $ cd map-goblin-backend
+    $ ./gradlew bootJar
+```
+
+## 실행
+
+------------------------------
+```bash
+    $ cd build/libs
+    $ java -jar map-goblin-0.0.1-SNAPSHOT.jar
+```
 
 ## 도메인 설계
 
