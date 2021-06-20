@@ -120,6 +120,10 @@ public class RequestService {
         return requestRepository.findById(id).orElse(null);
     }
 
+    public void findRequestInfoById(Long requestId) {
+        
+    }
+
     @Transactional
     public RequestReply replySave(RequestReply reply){
         return requestReplyRepository.save(reply);
