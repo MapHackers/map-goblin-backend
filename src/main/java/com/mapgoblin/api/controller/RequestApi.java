@@ -57,107 +57,24 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 요청사항 상세 조회
+     *
+     * @param userId
+     * @param repositoryName
+     * @param requestId
+     * @return
+     */
     @GetMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}")
     public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
-        HashMap<String, List<HashMap<String, String>>> result = new HashMap<>();
+        HashMap<String, List<HashMap<String, String>>> result = requestService.findRequestInfoById(requestId);
 
-        Request request = requestService.findById(requestId);
-
-        // request title, content
-        List<HashMap<String, String>> values = new ArrayList<>();
-
-        HashMap<String, String> value = new HashMap<>();
-
-        value.put("title", request.getTitle());
-        value.put("content", request.getContent());
-        value.put("status", request.getStatus().toString());
-        value.put("createdBy", request.getCreatedBy());
-
-        values.add(value);
-
-        result.put("values", values);
-
-        // 댓글
-        List<HashMap<String, String>> replies = new ArrayList<>();
-
-        List<RequestReply> findReplies = requestService.findRepliesByRequest(request);
-
-        for (RequestReply findReply : findReplies) {
-            HashMap<String, String> replyData = new HashMap<>();
-
-            Member replyMember = memberService.findByUserId(findReply.getCreatedBy());
-
-            replyData.put("author", findReply.getCreatedBy());
-            replyData.put("content", findReply.getContent());
-            replyData.put("name", replyMember.getName());
-            replyData.put("profile", replyMember.getProfile());
-            replyData.put("datetime", findReply.getCreatedDate().toString());
-
-            replies.add(replyData);
+        if(result != null){
+            return ResponseEntity.ok(result);
+        }else{
+            return ApiResult.errorMessage("해당 요청이 존재하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
-
-        if(!replies.isEmpty()){
-            result.put("replies", replies);
-        }
-
-        // request data
-        List<RequestData> requestDataList = request.getRequestDataList();
-        List<HashMap<String, String>> added = new ArrayList<>();
-        List<HashMap<String, String>> modified = new ArrayList<>();
-        List<HashMap<String, String>> delete = new ArrayList<>();
-        List<HashMap<String, String>> layer = new ArrayList<>();
-
-        for (RequestData requestData : requestDataList) {
-
-            HashMap<String, String> data = new HashMap<>();
-
-            if(requestData.getMapDataId() == null){
-                data.put("mapDataId", null);
-            }else{
-                data.put("mapDataId", requestData.getMapDataId().toString());
-            }
-
-            data.put("layerId", requestData.getLayerId().toString());
-            data.put("geometry", requestData.getGeometry());
-            data.put("action", requestData.getAction().toString());
-            data.put("name", requestData.getName());
-            data.put("createdDate", requestData.getCreateDate().toString());
-
-            if(requestData.getAction() == RequestAction.INSERT){
-                if(requestData.getMapDataId() == null){
-                    //layer
-                    layer.add(data);
-                }else{
-                    //added
-                    added.add(data);
-                }
-            }else if(requestData.getAction() == RequestAction.UPDATE){
-                //modified
-                modified.add(data);
-            }else if(requestData.getAction() == RequestAction.DELETE){
-                //delete
-                delete.add(data);
-            }
-        }
-
-        if(!added.isEmpty()){
-            result.put("added", added);
-        }
-
-        if(!modified.isEmpty()){
-            result.put("modified", modified);
-        }
-
-        if(!delete.isEmpty()){
-            result.put("delete", delete);
-        }
-
-        if(!layer.isEmpty()){
-            result.put("layer", layer);
-        }
-
-        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/{userId}/repositories/{repositoryName}/requests")

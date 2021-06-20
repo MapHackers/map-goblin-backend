@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ public class RequestService {
     private final LayerRepository layerRepository;
     private final MapDataRepository mapDataRepository;
     private final ReviewRepository reviewRepository;
+    private final MemberRepository memberRepository;
 
     public Page<RequestDto> findRequestsOfSpace(Space space, RequestStatus status, Pageable pageable) {
 
@@ -120,8 +122,160 @@ public class RequestService {
         return requestRepository.findById(id).orElse(null);
     }
 
-    public void findRequestInfoById(Long requestId) {
-        
+    /**
+     * 요청사항 상세 조회
+     *
+     * @param requestId
+     * @return
+     */
+    public HashMap<String, List<HashMap<String, String>>> findRequestInfoById(Long requestId) {
+        HashMap<String, List<HashMap<String, String>>> result = new HashMap<>();
+
+        Request request = requestRepository.findById(requestId).orElse(null);
+
+        if(request != null) {
+
+            // request information
+            List<HashMap<String, String>> values = setRequestValues(request);
+
+            result.put("values", values);
+
+            // replies information
+            List<HashMap<String, String>> replies = setReplyValues(request);
+
+            if(replies != null && !replies.isEmpty()){
+                result.put("replies", replies);
+            }
+
+            // request data information
+            setRequestDataValues(result, request);
+
+            return result;
+        }else {
+            System.out.println("request is null");
+            return null;
+        }
+
+    }
+
+    /**
+     * 요청사항 정보 set
+     *
+     * @param request
+     * @return
+     */
+    private List<HashMap<String, String>> setRequestValues(Request request) {
+        List<HashMap<String, String>> values = new ArrayList<>();
+
+        HashMap<String, String> value = new HashMap<>();
+
+        value.put("title", request.getTitle());
+        value.put("content", request.getContent());
+        value.put("status", request.getStatus().toString());
+        value.put("createdBy", request.getCreatedBy());
+
+        values.add(value);
+
+        return values;
+    }
+
+    /**
+     * 요청사항 댓글 정보 set
+     *
+     * @param request
+     * @return
+     */
+    private List<HashMap<String, String>> setReplyValues(Request request) {
+        List<HashMap<String, String>> replies = new ArrayList<>();
+
+        List<RequestReply> findReplies = requestReplyRepository.findByRequest(request).orElse(null);
+
+        if(findReplies != null) {
+            for (RequestReply findReply : findReplies) {
+                HashMap<String, String> replyData = new HashMap<>();
+
+                Member replyMember = memberRepository.findByUserId(findReply.getCreatedBy()).orElse(null);
+
+                if(replyMember != null) {
+                    replyData.put("author", findReply.getCreatedBy());
+                    replyData.put("content", findReply.getContent());
+                    replyData.put("name", replyMember.getName());
+                    replyData.put("profile", replyMember.getProfile());
+                    replyData.put("datetime", findReply.getCreatedDate().toString());
+
+                    replies.add(replyData);
+                }
+            }
+
+            return replies;
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * 요청사항 데이터 정보 set
+     *
+     * @param result
+     * @param request
+     */
+    private void setRequestDataValues(HashMap<String, List<HashMap<String, String>>> result, Request request) {
+        List<RequestData> requestDataList = request.getRequestDataList();
+
+        if(requestDataList != null) {
+            List<HashMap<String, String>> added = new ArrayList<>();
+            List<HashMap<String, String>> modified = new ArrayList<>();
+            List<HashMap<String, String>> delete = new ArrayList<>();
+            List<HashMap<String, String>> layer = new ArrayList<>();
+
+            for (RequestData requestData : requestDataList) {
+                HashMap<String, String> data = new HashMap<>();
+
+                if(requestData.getMapDataId() == null){
+                    data.put("mapDataId", null);
+                }else{
+                    data.put("mapDataId", requestData.getMapDataId().toString());
+                }
+
+                data.put("layerId", requestData.getLayerId().toString());
+                data.put("geometry", requestData.getGeometry());
+                data.put("action", requestData.getAction().toString());
+                data.put("name", requestData.getName());
+                data.put("createdDate", requestData.getCreateDate().toString());
+
+                if(requestData.getAction() == RequestAction.INSERT){
+                    if(requestData.getMapDataId() == null){
+                        //layer
+                        layer.add(data);
+                    }else{
+                        //added
+                        added.add(data);
+                    }
+                }else if(requestData.getAction() == RequestAction.UPDATE){
+                    //modified
+                    modified.add(data);
+                }else if(requestData.getAction() == RequestAction.DELETE){
+                    //delete
+                    delete.add(data);
+                }
+            }
+
+            if(!added.isEmpty()){
+                result.put("added", added);
+            }
+
+            if(!modified.isEmpty()){
+                result.put("modified", modified);
+            }
+
+            if(!delete.isEmpty()){
+                result.put("delete", delete);
+            }
+
+            if(!layer.isEmpty()){
+                result.put("layer", layer);
+            }
+        }
     }
 
     @Transactional
