@@ -1,5 +1,6 @@
 package com.mapgoblin.service;
 
+import com.mapgoblin.api.dto.request.CompareDto;
 import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
@@ -276,6 +277,53 @@ public class RequestService {
                 result.put("layer", layer);
             }
         }
+    }
+
+
+    public HashMap<String, List<CompareDto>> compareMapData(Long hostId, Long clonedId) {
+
+        HashMap<String, List<CompareDto>> result = new HashMap<>();
+
+        Space hostSpace = spaceRepository.findById(hostId).orElse(null);
+        Space clonedSpace = spaceRepository.findById(clonedId).orElse(null);
+
+        if(hostSpace != null && clonedSpace != null) {
+            List<Layer> hostLayers = hostSpace.getMap().getLayers();
+            List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
+
+            //새로 생성된 레이어
+            List<CompareDto> createdLayer = detectNewLayer(clonedLayers);
+
+            if(!createdLayer.isEmpty()){
+
+                result.put("layer", createdLayer);
+            }
+        }
+
+        return result;
+    }
+
+    private List<CompareDto> detectNewLayer(List<Layer> clonedLayers) {
+        List<CompareDto> result = new ArrayList<>();
+
+        for (Layer clonedLayer : clonedLayers) {
+            if(clonedLayer.getHost() == null){
+                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(null, clonedLayer.getId(), RequestStatus.WAITING).orElse(null);
+
+                if(findRequestData == null){
+                    CompareDto compareDto = new CompareDto();
+                    compareDto.setId(clonedLayer.getId());
+                    compareDto.setLayerId(clonedLayer.getId());
+                    compareDto.setName(clonedLayer.getName());
+                    compareDto.setCreatedDate(clonedLayer.getModifiedDate());
+                    compareDto.setGeometry(null);
+
+                    result.add(compareDto);
+                }
+            }
+        }
+
+        return result;
     }
 
     @Transactional
