@@ -298,6 +298,37 @@ public class RequestService {
 
                 result.put("layer", createdLayer);
             }
+
+            for (Layer hostLayer : hostLayers) {
+                for (Layer clonedLayer : clonedLayers) {
+                    if(clonedLayer.getHost() == hostLayer){
+                        List<MapData> hostMapDataList = hostLayer.getMapDataList();
+                        List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
+
+                        //지오메트리 hash
+                        HashMap<String, MapData> hostGeom = new HashMap<>();
+                        HashMap<String, MapData> cloneGeom = new HashMap<>();
+
+                        for (MapData mapData : hostMapDataList) {
+                            hostGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        for (MapData mapData : cloneMapDataList) {
+                            cloneGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        List<String> geoms = new ArrayList<>();
+
+                        // 삭제된 데이터
+                        List<CompareDto> deleteList = detectDeletedData(hostGeom, cloneGeom, geoms, hostLayer.getId());
+
+                        if(!deleteList.isEmpty()){
+                            result.put("delete", deleteList);
+                        }
+                    }
+                }
+            }
+
         }
 
         return result;
@@ -322,6 +353,38 @@ public class RequestService {
                 }
             }
         }
+
+        return result;
+    }
+
+    private List<CompareDto> detectDeletedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom, List<String> geoms, Long hostLayerId) {
+        List<CompareDto> result = new ArrayList<>();
+
+        hostGeom.forEach((s, mapData) -> {
+            if(!cloneGeom.containsKey(s)){
+                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+
+                if(findRequestData == null){
+                    CompareDto compareDto = new CompareDto();
+                    compareDto.setId(mapData.getId());
+                    compareDto.setLayerId(hostLayerId);
+                    compareDto.setName(mapData.getName());
+                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                    compareDto.setGeometry(s);
+
+                    result.add(compareDto);
+
+                }
+
+                geoms.add(s);
+            }
+        });
+
+        for (String geom : geoms) {
+            hostGeom.remove(geom);
+        }
+
+        geoms.clear();
 
         return result;
     }
