@@ -332,6 +332,16 @@ public class RequestService {
                         if(!addedList.isEmpty()){
                             result.put("added", addedList);
                         }
+
+                        //수정된 데이터
+                        List<CompareDto> modifiedList = detectModifiedData(hostGeom, cloneGeom, hostLayer.getId());
+
+                        if(!modifiedList.isEmpty()){
+                            result.put("modified", modifiedList);
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -363,7 +373,8 @@ public class RequestService {
         return result;
     }
 
-    private List<CompareDto> detectDeletedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom, List<String> geoms, Long hostLayerId) {
+    private List<CompareDto> detectDeletedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
+                                               List<String> geoms, Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
 
         hostGeom.forEach((s, mapData) -> {
@@ -421,6 +432,32 @@ public class RequestService {
         for (String geom : geoms) {
             cloneGeom.remove(geom);
         }
+
+        return result;
+    }
+
+    private List<CompareDto> detectModifiedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
+                                                Long hostLayerId) {
+        List<CompareDto> result = new ArrayList<>();
+
+        cloneGeom.forEach((s, mapData) -> {
+            MapData hostData = hostGeom.get(s);
+
+            if(!mapData.equals(hostData)){
+                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+
+                if(findRequestData == null){
+                    CompareDto compareDto = new CompareDto();
+                    compareDto.setId(mapData.getId());
+                    compareDto.setLayerId(hostLayerId);
+                    compareDto.setName(mapData.getName());
+                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                    compareDto.setGeometry(s);
+
+                    result.add(compareDto);
+                }
+            }
+        });
 
         return result;
     }
