@@ -325,7 +325,13 @@ public class RequestService {
                         if(!deleteList.isEmpty()){
                             result.put("delete", deleteList);
                         }
-                    }
+
+                        //추가된 데이터
+                        List<CompareDto> addedList = detectAddedData(hostGeom, cloneGeom, geoms, hostLayer.getId());
+
+                        if(!addedList.isEmpty()){
+                            result.put("added", addedList);
+                        }
                 }
             }
 
@@ -385,6 +391,36 @@ public class RequestService {
         }
 
         geoms.clear();
+
+        return result;
+    }
+
+    private List<CompareDto> detectAddedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
+                                             List<String> geoms, Long hostLayerId) {
+        List<CompareDto> result = new ArrayList<>();
+
+        cloneGeom.forEach((s, mapData) -> {
+            if(!hostGeom.containsKey(s)){
+                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+
+                if(findRequestData == null){
+                    CompareDto compareDto = new CompareDto();
+                    compareDto.setId(mapData.getId());
+                    compareDto.setLayerId(hostLayerId);
+                    compareDto.setName(mapData.getName());
+                    compareDto.setCreatedDate(mapData.getModifiedDate());
+                    compareDto.setGeometry(s);
+
+                    result.add(compareDto);
+
+                }
+                geoms.add(s);
+            }
+        });
+
+        for (String geom : geoms) {
+            cloneGeom.remove(geom);
+        }
 
         return result;
     }
