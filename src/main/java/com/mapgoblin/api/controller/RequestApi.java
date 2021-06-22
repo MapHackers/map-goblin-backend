@@ -108,7 +108,7 @@ public class RequestApi {
     public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String repositoryName,
                                                 @AuthenticationPrincipal Member member) {
 
-        HashMap<String, List<CompareDto>> result = new HashMap<>();
+        HashMap<String, List<CompareDto>> result;
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -119,149 +119,8 @@ public class RequestApi {
             List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), target.get(0).getId());
 
             if(byMemberIdAndHostId.size() == 1 && byMemberIdAndHostId.get(0) != null){
-                Space hostSpace = spaceService.findById(target.get(0).getId());
-                Space clonedSpace = spaceService.findById(byMemberIdAndHostId.get(0).getId());
 
-                List<Layer> hostLayers = hostSpace.getMap().getLayers();
-                List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
-
-                //새로 생성된 레이어
-                List<CompareDto> createdLayer = new ArrayList<>();
-
-                for (Layer clonedLayer : clonedLayers) {
-                    if(clonedLayer.getHost() == null){
-                        RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(null, clonedLayer.getId(), RequestStatus.WAITING);
-                        if(findRequestData == null){
-                            CompareDto compareDto = new CompareDto();
-                            compareDto.setId(clonedLayer.getId());
-                            compareDto.setLayerId(clonedLayer.getId());
-                            compareDto.setName(clonedLayer.getName());
-                            compareDto.setCreatedDate(clonedLayer.getModifiedDate());
-                            compareDto.setGeometry(null);
-
-                            createdLayer.add(compareDto);
-                        }
-                    }
-                }
-
-                if(!createdLayer.isEmpty()){
-
-                    result.put("layer", createdLayer);
-                }
-
-                for (Layer hostLayer : hostLayers) {
-                    for (Layer clonedLayer : clonedLayers) {
-                        if(clonedLayer.getHost() == hostLayer){
-                            List<MapData> hostMapDataList = hostLayer.getMapDataList();
-                            List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
-
-                            //지오메트리 hash
-                            HashMap<String, MapData> hostGeom = new HashMap<>();
-                            HashMap<String, MapData> cloneGeom = new HashMap<>();
-
-                            for (MapData mapData : hostMapDataList) {
-                                hostGeom.put(mapData.getGeometry(), mapData);
-                            }
-
-                            for (MapData mapData : cloneMapDataList) {
-                                cloneGeom.put(mapData.getGeometry(), mapData);
-                            }
-
-                            List<String> geoms = new ArrayList<>();
-
-                            // 삭제된 데이터
-                            List<CompareDto> deleteList = new ArrayList<>();
-
-                            hostGeom.forEach((s, mapData) -> {
-                                if(!cloneGeom.containsKey(s)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
-                                    if(findRequestData == null){
-                                        CompareDto compareDto = new CompareDto();
-                                        compareDto.setId(mapData.getId());
-                                        compareDto.setLayerId(hostLayer.getId());
-                                        compareDto.setName(mapData.getName());
-                                        compareDto.setCreatedDate(mapData.getModifiedDate());
-                                        compareDto.setGeometry(s);
-
-                                        deleteList.add(compareDto);
-
-                                        geoms.add(s);
-                                    }else{
-                                        geoms.add(s);
-                                    }
-                                }
-                            });
-
-                            for (String geom : geoms) {
-                                hostGeom.remove(geom);
-                            }
-
-                            geoms.clear();
-
-                            if(!deleteList.isEmpty()){
-                                result.put("delete", deleteList);
-                            }
-
-                            //추가된 데이터
-                            List<CompareDto> addedList = new ArrayList<>();
-
-                            cloneGeom.forEach((s, mapData) -> {
-                                if(!hostGeom.containsKey(s)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
-                                    if(findRequestData == null){
-                                        CompareDto compareDto = new CompareDto();
-                                        compareDto.setId(mapData.getId());
-                                        compareDto.setLayerId(hostLayer.getId());
-                                        compareDto.setName(mapData.getName());
-                                        compareDto.setCreatedDate(mapData.getModifiedDate());
-                                        compareDto.setGeometry(s);
-
-                                        addedList.add(compareDto);
-
-                                        geoms.add(s);
-                                    }else{
-                                        geoms.add(s);
-                                    }
-                                }
-                            });
-
-                            for (String geom : geoms) {
-                                cloneGeom.remove(geom);
-                            }
-
-                            if(!addedList.isEmpty()){
-                                result.put("added", addedList);
-                            }
-
-                            //수정된 데이터
-                            List<CompareDto> modifiedList = new ArrayList<>();
-
-                            cloneGeom.forEach((s, mapData) -> {
-                                MapData hostData = hostGeom.get(s);
-
-                                if(!mapData.equals(hostData)){
-                                    RequestData findRequestData = requestDataService.findByMapDataIdAndLayerId(mapData.getId(), hostLayer.getId(), RequestStatus.WAITING);
-                                    if(findRequestData == null){
-                                        CompareDto compareDto = new CompareDto();
-                                        compareDto.setId(mapData.getId());
-                                        compareDto.setLayerId(hostLayer.getId());
-                                        compareDto.setName(mapData.getName());
-                                        compareDto.setCreatedDate(mapData.getModifiedDate());
-                                        compareDto.setGeometry(s);
-
-                                        modifiedList.add(compareDto);
-                                    }
-                                }
-                            });
-
-                            if(!modifiedList.isEmpty()){
-                                result.put("modified", modifiedList);
-                            }
-
-                            break;
-                        }
-                    }
-                }
+                result = requestService.compareMapData(target.get(0).getId(), byMemberIdAndHostId.get(0).getId());
 
                 if(result.isEmpty()){
                     return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
