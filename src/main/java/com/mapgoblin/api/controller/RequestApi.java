@@ -36,6 +36,15 @@ public class RequestApi {
     private final AlarmService alarmService;
     private final MemberSpaceService memberSpaceService;
 
+    /**
+     * 요청사항 리스트 조회
+     *
+     * @param userId
+     * @param repositoryName
+     * @param status
+     * @param pageable
+     * @return
+     */
     @GetMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
                                             @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -77,6 +86,14 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 요청사항 생성
+     *
+     * @param request
+     * @param userId
+     * @param repositoryName
+     * @return
+     */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests")
     public ResponseEntity<?> create(@RequestBody HashMap<String, List<HashMap<String, String>>> request,
                                     @PathVariable String userId, @PathVariable String repositoryName) {
@@ -104,6 +121,14 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 원본지도와 복제지도 변경사항 감지
+     *
+     * @param userId
+     * @param repositoryName
+     * @param member
+     * @return
+     */
     @GetMapping("/{userId}/repositories/{repositoryName}/compare")
     public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String repositoryName,
                                                 @AuthenticationPrincipal Member member) {
@@ -137,15 +162,28 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 원본지도 변경 데이터 받아오기
+     *
+     * @param userId
+     * @param repositoryName
+     * @return
+     * @throws CloneNotSupportedException
+     */
     @PostMapping("/{userId}/repositories/{repositoryName}/pull")
     public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String repositoryName) throws CloneNotSupportedException {
-
-
-
 
         return ResponseEntity.ok("");
     }
 
+    /**
+     *
+     *
+     * @param userId
+     * @param repositoryName
+     * @param member
+     * @return
+     */
     @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
     public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
 
@@ -320,6 +358,15 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 요청사항 댓글 조회
+     *
+     * @param request
+     * @param userId
+     * @param repositoryName
+     * @param requestId
+     * @return
+     */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
                                          @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
@@ -345,6 +392,15 @@ public class RequestApi {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 복제지도의 변경사항 반영 요청 수락(원본지도에 변경 데이터 반영)
+     *
+     * @param userId
+     * @param repositoryName
+     * @param requestId
+     * @return
+     * @throws CloneNotSupportedException
+     */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/merge")
     public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId) throws CloneNotSupportedException {
 
@@ -366,6 +422,14 @@ public class RequestApi {
         }
     }
 
+    /**
+     * 복제지도의 변경사항 반영 요청 거부
+     *
+     * @param userId
+     * @param repositoryName
+     * @param requestId
+     * @return
+     */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/denied")
     public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
