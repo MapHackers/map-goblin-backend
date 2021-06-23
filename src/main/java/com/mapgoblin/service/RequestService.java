@@ -320,14 +320,14 @@ public class RequestService {
                         List<String> geoms = new ArrayList<>();
 
                         // 삭제된 데이터
-                        List<CompareDto> deleteList = detectDeletedData(hostGeom, cloneGeom, geoms, hostLayer.getId());
+                        List<CompareDto> deleteList = detectData(hostGeom, cloneGeom, geoms, hostLayer.getId());
 
                         if(!deleteList.isEmpty()){
                             result.put("delete", deleteList);
                         }
 
                         //추가된 데이터
-                        List<CompareDto> addedList = detectAddedData(hostGeom, cloneGeom, geoms, hostLayer.getId());
+                        List<CompareDto> addedList = detectData(cloneGeom, hostGeom, geoms, hostLayer.getId());
 
                         if(!addedList.isEmpty()){
                             result.put("added", addedList);
@@ -373,12 +373,12 @@ public class RequestService {
         return result;
     }
 
-    private List<CompareDto> detectDeletedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
+    private List<CompareDto> detectData(HashMap<String, MapData> target, HashMap<String, MapData> comparisonTarget,
                                                List<String> geoms, Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
 
-        hostGeom.forEach((s, mapData) -> {
-            if(!cloneGeom.containsKey(s)){
+        target.forEach((s, mapData) -> {
+            if(!comparisonTarget.containsKey(s)){
                 RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
 
                 if(findRequestData == null){
@@ -398,40 +398,10 @@ public class RequestService {
         });
 
         for (String geom : geoms) {
-            hostGeom.remove(geom);
+            target.remove(geom);
         }
 
         geoms.clear();
-
-        return result;
-    }
-
-    private List<CompareDto> detectAddedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
-                                             List<String> geoms, Long hostLayerId) {
-        List<CompareDto> result = new ArrayList<>();
-
-        cloneGeom.forEach((s, mapData) -> {
-            if(!hostGeom.containsKey(s)){
-                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
-
-                if(findRequestData == null){
-                    CompareDto compareDto = new CompareDto();
-                    compareDto.setId(mapData.getId());
-                    compareDto.setLayerId(hostLayerId);
-                    compareDto.setName(mapData.getName());
-                    compareDto.setCreatedDate(mapData.getModifiedDate());
-                    compareDto.setGeometry(s);
-
-                    result.add(compareDto);
-
-                }
-                geoms.add(s);
-            }
-        });
-
-        for (String geom : geoms) {
-            cloneGeom.remove(geom);
-        }
 
         return result;
     }
