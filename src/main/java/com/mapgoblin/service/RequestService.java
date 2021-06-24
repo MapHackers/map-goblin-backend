@@ -279,7 +279,13 @@ public class RequestService {
         }
     }
 
-
+    /**
+     * 원본 지도, 클론 지도 데이터 비교
+     *
+     * @param hostId
+     * @param clonedId
+     * @return
+     */
     public HashMap<String, List<CompareDto>> compareMapData(Long hostId, Long clonedId) {
 
         HashMap<String, List<CompareDto>> result = new HashMap<>();
@@ -350,6 +356,12 @@ public class RequestService {
         return result;
     }
 
+    /**
+     * 새로 생긴 레이어 감지
+     *
+     * @param clonedLayers
+     * @return
+     */
     private List<CompareDto> detectNewLayer(List<Layer> clonedLayers) {
         List<CompareDto> result = new ArrayList<>();
 
@@ -373,6 +385,15 @@ public class RequestService {
         return result;
     }
 
+    /**
+     * 데이터 추가, 삭제 감지
+     *
+     * @param target
+     * @param comparisonTarget
+     * @param geoms
+     * @param hostLayerId
+     * @return
+     */
     private List<CompareDto> detectData(HashMap<String, MapData> target, HashMap<String, MapData> comparisonTarget,
                                                List<String> geoms, Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
@@ -406,6 +427,14 @@ public class RequestService {
         return result;
     }
 
+    /**
+     * 수정된 데이터 감지
+     *
+     * @param hostGeom
+     * @param cloneGeom
+     * @param hostLayerId
+     * @return
+     */
     private List<CompareDto> detectModifiedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
                                                 Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
