@@ -177,7 +177,7 @@ public class RequestApi {
     }
 
     /**
-     *
+     * 원본지도 변경 데이터 감지
      *
      * @param userId
      * @param repositoryName
@@ -185,7 +185,8 @@ public class RequestApi {
      * @return
      */
     @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
-    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
+    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName,
+                                             @AuthenticationPrincipal Member member){
 
         HashMap<String, List<CompareDto>> result = new HashMap<>();
 
@@ -211,7 +212,6 @@ public class RequestApi {
             }
 
             Space hostSpace = spaceService.findById(target.get(0).getHostId());
-
 
             List<Layer> hostLayers = hostSpace.getMap().getLayers();
             List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
@@ -369,7 +369,8 @@ public class RequestApi {
      */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
-                                         @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+                                       @PathVariable String userId, @PathVariable String repositoryName,
+                                       @PathVariable Long requestId){
 
         HashMap<String, String> result = new HashMap<>();
 

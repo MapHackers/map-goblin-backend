@@ -356,6 +356,7 @@ public class RequestService {
         return result;
     }
 
+
     /**
      * 새로 생긴 레이어 감지
      *
@@ -457,6 +458,20 @@ public class RequestService {
                 }
             }
         });
+
+        return result;
+    }
+
+    /**
+     * 원본 지도 변경 사항 감지
+     *
+     * @param hostId
+     * @param clonedSpace
+     * @return
+     */
+    public HashMap<String, List<CompareDto>> comparePullData(Long hostId, Space clonedSpace) {
+
+        HashMap<String, List<CompareDto>> result = new HashMap<>();
 
         return result;
     }
