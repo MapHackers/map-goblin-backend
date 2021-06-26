@@ -6,10 +6,8 @@ import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.AlarmType;
-import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.domain.base.SourceType;
-import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 

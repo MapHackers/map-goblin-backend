@@ -2,7 +2,6 @@ package com.mapgoblin.service;
 
 import com.mapgoblin.api.dto.request.CompareDto;
 import com.mapgoblin.api.dto.request.RequestDto;
-import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
@@ -14,13 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
