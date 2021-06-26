@@ -473,6 +473,52 @@ public class RequestService {
 
         HashMap<String, List<CompareDto>> result = new HashMap<>();
 
+        Space hostSpace = spaceRepository.findById(hostId).orElse(null);
+
+        if(hostSpace != null && clonedSpace != null) {
+            List<Layer> hostLayers = hostSpace.getMap().getLayers();
+            List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
+
+            //새로 생성된 레이어
+            List<CompareDto> createdLayer = detectOriginCreateLayer(hostLayers, clonedLayers);
+
+            if(!createdLayer.isEmpty()){
+
+                result.put("layer", createdLayer);
+            }
+
+            
+        }
+
+        return result;
+    }
+
+    private List<CompareDto> detectOriginCreateLayer(List<Layer> hostLayers, List<Layer> clonedLayers) {
+        //새로 생성된 레이어
+        List<CompareDto> result = new ArrayList<>();
+
+        for (Layer hostLayer : hostLayers) {
+            boolean layerCheck = true;
+
+            for (Layer clonedLayer : clonedLayers) {
+                if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
+                    layerCheck = false;
+                    break;
+                }
+            }
+
+            if(layerCheck){
+                CompareDto compareDto = new CompareDto();
+                compareDto.setId(hostLayer.getId());
+                compareDto.setLayerId(hostLayer.getId());
+                compareDto.setName(hostLayer.getName());
+                compareDto.setCreatedDate(hostLayer.getModifiedDate());
+                compareDto.setGeometry(null);
+
+                result.add(compareDto);
+            }
+        }
+
         return result;
     }
 
