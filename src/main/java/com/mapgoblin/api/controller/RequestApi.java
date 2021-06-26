@@ -6,10 +6,8 @@ import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.AlarmType;
-import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
 import com.mapgoblin.domain.base.SourceType;
-import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -177,7 +174,7 @@ public class RequestApi {
     }
 
     /**
-     *
+     * 원본지도 변경 데이터 감지
      *
      * @param userId
      * @param repositoryName
@@ -185,9 +182,10 @@ public class RequestApi {
      * @return
      */
     @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
-    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
+    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName,
+                                             @AuthenticationPrincipal Member member){
 
-        HashMap<String, List<CompareDto>> result = new HashMap<>();
+        HashMap<String, List<CompareDto>> result;
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -210,142 +208,7 @@ public class RequestApi {
                 return ApiResult.errorMessage("주인이 아닙니다.", HttpStatus.OK);
             }
 
-            Space hostSpace = spaceService.findById(target.get(0).getHostId());
-
-
-            List<Layer> hostLayers = hostSpace.getMap().getLayers();
-            List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
-
-            //새로 생성된 레이어
-            List<CompareDto> createdLayer = new ArrayList<>();
-
-            for (Layer hostLayer : hostLayers) {
-                boolean layerCheck = true;
-
-                for (Layer clonedLayer : clonedLayers) {
-                    if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
-                        layerCheck = false;
-                        break;
-                    }
-                }
-
-                if(layerCheck){
-                    CompareDto compareDto = new CompareDto();
-                    compareDto.setId(hostLayer.getId());
-                    compareDto.setLayerId(hostLayer.getId());
-                    compareDto.setName(hostLayer.getName());
-                    compareDto.setCreatedDate(hostLayer.getModifiedDate());
-                    compareDto.setGeometry(null);
-
-                    createdLayer.add(compareDto);
-                }
-            }
-
-            if(!createdLayer.isEmpty()){
-
-                result.put("layer", createdLayer);
-            }
-
-            for (Layer clonedLayer : clonedLayers) {
-                for (Layer hostLayer : hostLayers) {
-                    if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
-                        List<MapData> hostMapDataList = hostLayer.getMapDataList();
-                        List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
-
-                        //지오메트리 hash
-                        HashMap<String, MapData> hostGeom = new HashMap<>();
-                        HashMap<String, MapData> cloneGeom = new HashMap<>();
-
-                        for (MapData mapData : hostMapDataList) {
-                            hostGeom.put(mapData.getGeometry(), mapData);
-                        }
-
-                        for (MapData mapData : cloneMapDataList) {
-                            cloneGeom.put(mapData.getGeometry(), mapData);
-                        }
-
-                        List<String> geoms = new ArrayList<>();
-
-                        // 삭제된 데이터
-                        List<CompareDto> deleteList = new ArrayList<>();
-
-                        cloneGeom.forEach((s, mapData) -> {
-                            if(!hostGeom.containsKey(s)){
-                                CompareDto compareDto = new CompareDto();
-                                compareDto.setId(mapData.getId());
-                                compareDto.setLayerId(clonedLayer.getId());
-                                compareDto.setName(mapData.getName());
-                                compareDto.setCreatedDate(mapData.getModifiedDate());
-                                compareDto.setGeometry(s);
-
-                                deleteList.add(compareDto);
-
-                                geoms.add(s);
-                            }
-                        });
-
-                        for (String geom : geoms) {
-                            hostGeom.remove(geom);
-                        }
-
-                        geoms.clear();
-
-                        if(!deleteList.isEmpty()){
-                            result.put("delete", deleteList);
-                        }
-
-                        //추가된 데이터
-                        List<CompareDto> addedList = new ArrayList<>();
-
-                        hostGeom.forEach((s, mapData) -> {
-                            if(!cloneGeom.containsKey(s)){
-                                CompareDto compareDto = new CompareDto();
-                                compareDto.setId(mapData.getId());
-                                compareDto.setLayerId(clonedLayer.getId());
-                                compareDto.setName(mapData.getName());
-                                compareDto.setCreatedDate(mapData.getModifiedDate());
-                                compareDto.setGeometry(s);
-
-                                addedList.add(compareDto);
-
-                                geoms.add(s);
-                            }
-                        });
-
-                        for (String geom : geoms) {
-                            hostGeom.remove(geom);
-                        }
-
-                        if(!addedList.isEmpty()){
-                            result.put("added", addedList);
-                        }
-
-                        //수정된 데이터
-                        List<CompareDto> modifiedList = new ArrayList<>();
-
-                        hostGeom.forEach((s, mapData) -> {
-                            MapData hostData = cloneGeom.get(s);
-
-                            if(!mapData.equals(hostData)){
-                                CompareDto compareDto = new CompareDto();
-                                compareDto.setId(mapData.getId());
-                                compareDto.setLayerId(clonedLayer.getId());
-                                compareDto.setName(mapData.getName());
-                                compareDto.setCreatedDate(mapData.getModifiedDate());
-                                compareDto.setGeometry(s);
-
-                                modifiedList.add(compareDto);
-                            }
-                        });
-
-                        if(!modifiedList.isEmpty()){
-                            result.put("modified", modifiedList);
-                        }
-
-                        break;
-                    }
-                }
-            }
+            result = requestService.comparePullData(target.get(0).getHostId(), clonedSpace);
 
             if(result.isEmpty()){
                 return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
@@ -369,7 +232,8 @@ public class RequestApi {
      */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
-                                         @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+                                       @PathVariable String userId, @PathVariable String repositoryName,
+                                       @PathVariable Long requestId){
 
         HashMap<String, String> result = new HashMap<>();
 

@@ -2,7 +2,6 @@ package com.mapgoblin.service;
 
 import com.mapgoblin.api.dto.request.CompareDto;
 import com.mapgoblin.api.dto.request.RequestDto;
-import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
@@ -14,13 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -279,7 +276,13 @@ public class RequestService {
         }
     }
 
-
+    /**
+     * 원본 지도, 클론 지도 데이터 비교
+     *
+     * @param hostId
+     * @param clonedId
+     * @return
+     */
     public HashMap<String, List<CompareDto>> compareMapData(Long hostId, Long clonedId) {
 
         HashMap<String, List<CompareDto>> result = new HashMap<>();
@@ -350,6 +353,13 @@ public class RequestService {
         return result;
     }
 
+
+    /**
+     * 새로 생긴 레이어 감지
+     *
+     * @param clonedLayers
+     * @return
+     */
     private List<CompareDto> detectNewLayer(List<Layer> clonedLayers) {
         List<CompareDto> result = new ArrayList<>();
 
@@ -373,6 +383,15 @@ public class RequestService {
         return result;
     }
 
+    /**
+     * 데이터 추가, 삭제 감지
+     *
+     * @param target
+     * @param comparisonTarget
+     * @param geoms
+     * @param hostLayerId
+     * @return
+     */
     private List<CompareDto> detectData(HashMap<String, MapData> target, HashMap<String, MapData> comparisonTarget,
                                                List<String> geoms, Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
@@ -406,6 +425,14 @@ public class RequestService {
         return result;
     }
 
+    /**
+     * 수정된 데이터 감지
+     *
+     * @param hostGeom
+     * @param cloneGeom
+     * @param hostLayerId
+     * @return
+     */
     private List<CompareDto> detectModifiedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
                                                 Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
@@ -426,6 +453,192 @@ public class RequestService {
 
                     result.add(compareDto);
                 }
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * 원본 지도 변경 사항 감지
+     *
+     * @param hostId
+     * @param clonedSpace
+     * @return
+     */
+    public HashMap<String, List<CompareDto>> comparePullData(Long hostId, Space clonedSpace) {
+
+        HashMap<String, List<CompareDto>> result = new HashMap<>();
+
+        Space hostSpace = spaceRepository.findById(hostId).orElse(null);
+
+        if(hostSpace != null && clonedSpace != null) {
+            List<Layer> hostLayers = hostSpace.getMap().getLayers();
+            List<Layer> clonedLayers = clonedSpace.getMap().getLayers();
+
+            //새로 생성된 레이어
+            List<CompareDto> createdLayer = detectOriginCreateLayer(hostLayers, clonedLayers);
+
+            if(!createdLayer.isEmpty()){
+
+                result.put("layer", createdLayer);
+            }
+
+            for (Layer clonedLayer : clonedLayers) {
+                for (Layer hostLayer : hostLayers) {
+                    if (clonedLayer.getHost().getId().equals(hostLayer.getId())) {
+                        List<MapData> hostMapDataList = hostLayer.getMapDataList();
+                        List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
+
+                        //지오메트리 hash
+                        HashMap<String, MapData> hostGeom = new HashMap<>();
+                        HashMap<String, MapData> cloneGeom = new HashMap<>();
+
+                        for (MapData mapData : hostMapDataList) {
+                            hostGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        for (MapData mapData : cloneMapDataList) {
+                            cloneGeom.put(mapData.getGeometry(), mapData);
+                        }
+
+                        List<String> geoms = new ArrayList<>();
+
+                        // 삭제된 데이터
+                        List<CompareDto> deleteList = detectOriginAddedAndDeletedData(cloneGeom, hostGeom, geoms, clonedLayer.getId());
+
+                        for (String geom : geoms) {
+                            hostGeom.remove(geom);
+                        }
+
+                        geoms.clear();
+
+                        if(!deleteList.isEmpty()){
+                            result.put("delete", deleteList);
+                        }
+
+                        //추가된 데이터
+                        List<CompareDto> addedList = detectOriginAddedAndDeletedData(hostGeom, cloneGeom, geoms, clonedLayer.getId());
+
+                        for (String geom : geoms) {
+                            hostGeom.remove(geom);
+                        }
+
+                        geoms.clear();
+
+                        if(!addedList.isEmpty()){
+                            result.put("added", addedList);
+                        }
+
+                        //수정된 데이터
+                        List<CompareDto> modifiedList = detectOriginModifiedData(hostGeom, cloneGeom, clonedLayer.getId());
+
+                        if(!modifiedList.isEmpty()){
+                            result.put("modified", modifiedList);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     * 원본 지도에 추가된 레이어 감지
+     *
+     * @param hostLayers
+     * @param clonedLayers
+     * @return
+     */
+    private List<CompareDto> detectOriginCreateLayer(List<Layer> hostLayers, List<Layer> clonedLayers) {
+        //새로 생성된 레이어
+        List<CompareDto> result = new ArrayList<>();
+
+        for (Layer hostLayer : hostLayers) {
+            boolean layerCheck = true;
+
+            for (Layer clonedLayer : clonedLayers) {
+                if(clonedLayer.getHost().getId().equals(hostLayer.getId())){
+                    layerCheck = false;
+                    break;
+                }
+            }
+
+            if(layerCheck){
+                CompareDto compareDto = new CompareDto();
+                compareDto.setId(hostLayer.getId());
+                compareDto.setLayerId(hostLayer.getId());
+                compareDto.setName(hostLayer.getName());
+                compareDto.setCreatedDate(hostLayer.getModifiedDate());
+                compareDto.setGeometry(null);
+
+                result.add(compareDto);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 원본 지도 추가, 삭제 데이터 감지
+     *
+     * @param target
+     * @param comparisonTarget
+     * @param geoms
+     * @param clonedLayerId
+     * @return
+     */
+    private List<CompareDto> detectOriginAddedAndDeletedData(HashMap<String, MapData> target, HashMap<String, MapData> comparisonTarget,
+                                                             List<String> geoms, Long clonedLayerId) {
+        List<CompareDto> result = new ArrayList<>();
+
+        target.forEach((s, mapData) -> {
+            if(!comparisonTarget.containsKey(s)){
+                CompareDto compareDto = new CompareDto();
+                compareDto.setId(mapData.getId());
+                compareDto.setLayerId(clonedLayerId);
+                compareDto.setName(mapData.getName());
+                compareDto.setCreatedDate(mapData.getModifiedDate());
+                compareDto.setGeometry(s);
+
+                result.add(compareDto);
+
+                geoms.add(s);
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * 원본지도 데이터 수정 사항 감지
+     *
+     * @param hostGeom
+     * @param cloneGeom
+     * @param clonedLayerId
+     * @return
+     */
+    private List<CompareDto> detectOriginModifiedData(HashMap<String, MapData> hostGeom, HashMap<String, MapData> cloneGeom,
+                                                      Long clonedLayerId) {
+        //수정된 데이터
+        List<CompareDto> result = new ArrayList<>();
+
+        hostGeom.forEach((s, mapData) -> {
+            MapData hostData = cloneGeom.get(s);
+
+            if(!mapData.equals(hostData)){
+                CompareDto compareDto = new CompareDto();
+                compareDto.setId(mapData.getId());
+                compareDto.setLayerId(clonedLayerId);
+                compareDto.setName(mapData.getName());
+                compareDto.setCreatedDate(mapData.getModifiedDate());
+                compareDto.setGeometry(s);
+
+                result.add(compareDto);
             }
         });
 
