@@ -276,7 +276,7 @@ public class RequestApi {
 
             Request findRequest = requestService.findById(requestId);
 
-            requestService.merger(target.get(0).getId(), requestId);
+            requestService.merge(target.get(0).getId(), requestId);
 
             alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_ACCEPTED);
 

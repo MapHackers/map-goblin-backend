@@ -655,7 +655,7 @@ public class RequestService {
     }
 
     @Transactional
-    public void merger(Long spaceId, Long requestId) throws CloneNotSupportedException {
+    public void merge(Long spaceId, Long requestId) throws CloneNotSupportedException {
         Request findRequest = requestRepository.findById(requestId).orElse(null);
 
         List<RequestData> requestDataList = requestDataRepository.findByRequest(findRequest).orElse(null);
