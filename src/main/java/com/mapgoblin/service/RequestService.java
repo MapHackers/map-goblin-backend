@@ -1,6 +1,7 @@
 package com.mapgoblin.service;
 
 import com.mapgoblin.api.dto.request.CompareDto;
+import com.mapgoblin.api.dto.request.RequestDataDto;
 import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
@@ -41,13 +42,30 @@ public class RequestService {
     }
 
     @Transactional
-    public Long save(Request request, HashMap<String, List<HashMap<String, String>>> data){
+    public Long save(Request request, /*HashMap<String, List<HashMap<String, String>>> data*/ RequestDataDto data){
 
         requestRepository.save(request);
 
-        if(data.containsKey("added")){
-            List<HashMap<String, String>> added = data.get("added");
+//        if(data.containsKey("added")){
+//            List<HashMap<String, String>> added = data.get("added");
+//
+//            for (HashMap<String, String> addedData : added) {
+//                RequestData requestData = RequestData.create(Long.parseLong(addedData.get("id")),
+//                        Long.parseLong(addedData.get("layerId")),
+//                        addedData.get("name"),
+//                        LocalDateTime.parse(addedData.get("createdDate")),
+//                        addedData.get("geometry"),
+//                        RequestAction.INSERT);
+//
+//                request.addRequestData(requestData);
+//
+//                requestDataRepository.save(requestData);
+//            }
+//        }
 
+        List<HashMap<String, String>> added = data.getAdded();
+
+        if(added != null) {
             for (HashMap<String, String> addedData : added) {
                 RequestData requestData = RequestData.create(Long.parseLong(addedData.get("id")),
                         Long.parseLong(addedData.get("layerId")),
@@ -62,9 +80,26 @@ public class RequestService {
             }
         }
 
-        if(data.containsKey("modified")){
-            List<HashMap<String, String>> modified = data.get("modified");
+//        if(data.containsKey("modified")){
+//            List<HashMap<String, String>> modified = data.get("modified");
+//
+//            for (HashMap<String, String> modifiedData : modified) {
+//                RequestData requestData = RequestData.create(Long.parseLong(modifiedData.get("id")),
+//                        Long.parseLong(modifiedData.get("layerId")),
+//                        modifiedData.get("name"),
+//                        LocalDateTime.parse(modifiedData.get("createdDate")),
+//                        modifiedData.get("geometry"),
+//                        RequestAction.UPDATE);
+//
+//                request.addRequestData(requestData);
+//
+//                requestDataRepository.save(requestData);
+//            }
+//        }
 
+        List<HashMap<String, String>> modified = data.getModified();
+
+        if(modified != null) {
             for (HashMap<String, String> modifiedData : modified) {
                 RequestData requestData = RequestData.create(Long.parseLong(modifiedData.get("id")),
                         Long.parseLong(modifiedData.get("layerId")),
@@ -79,9 +114,27 @@ public class RequestService {
             }
         }
 
-        if(data.containsKey("delete")){
-            List<HashMap<String, String>> delete = data.get("delete");
 
+//        if(data.containsKey("delete")){
+//            List<HashMap<String, String>> delete = data.get("delete");
+//
+//            for (HashMap<String, String> deleteData : delete) {
+//                RequestData requestData = RequestData.create(Long.parseLong(deleteData.get("id")),
+//                        Long.parseLong(deleteData.get("layerId")),
+//                        deleteData.get("name"),
+//                        LocalDateTime.parse(deleteData.get("createdDate")),
+//                        deleteData.get("geometry"),
+//                        RequestAction.DELETE);
+//
+//                request.addRequestData(requestData);
+//
+//                requestDataRepository.save(requestData);
+//            }
+//        }
+
+        List<HashMap<String, String>> delete = data.getDelete();
+
+        if(delete != null) {
             for (HashMap<String, String> deleteData : delete) {
                 RequestData requestData = RequestData.create(Long.parseLong(deleteData.get("id")),
                         Long.parseLong(deleteData.get("layerId")),
@@ -96,9 +149,26 @@ public class RequestService {
             }
         }
 
-        if(data.containsKey("layer")){
-            List<HashMap<String, String>> layer = data.get("layer");
+//        if(data.containsKey("layer")){
+//            List<HashMap<String, String>> layer = data.get("layer");
+//
+//            for (HashMap<String, String> layerData : layer) {
+//                RequestData requestData = RequestData.create(null,
+//                        Long.parseLong(layerData.get("layerId")),
+//                        layerData.get("name"),
+//                        LocalDateTime.parse(layerData.get("createdDate")),
+//                        layerData.get("geometry"),
+//                        RequestAction.INSERT);
+//
+//                request.addRequestData(requestData);
+//
+//                requestDataRepository.save(requestData);
+//            }
+//        }
 
+        List<HashMap<String, String>> layer = data.getLayer();
+
+        if(layer != null) {
             for (HashMap<String, String> layerData : layer) {
                 RequestData requestData = RequestData.create(null,
                         Long.parseLong(layerData.get("layerId")),
