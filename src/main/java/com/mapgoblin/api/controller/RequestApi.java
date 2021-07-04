@@ -2,6 +2,7 @@ package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
 import com.mapgoblin.api.dto.request.CompareDto;
+import com.mapgoblin.api.dto.request.RequestDataDto;
 import com.mapgoblin.api.dto.request.RequestDto;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
@@ -92,7 +93,8 @@ public class RequestApi {
      * @return
      */
     @PostMapping("/{userId}/repositories/{repositoryName}/requests")
-    public ResponseEntity<?> create(@RequestBody HashMap<String, List<HashMap<String, String>>> request,
+    public ResponseEntity<?> create(/*@RequestBody HashMap<String, List<HashMap<String, String>>> request*/
+            @RequestBody RequestDataDto request,
                                     @PathVariable String userId, @PathVariable String repositoryName) {
 
         Member findMember = memberService.findByUserId(userId);
@@ -100,7 +102,8 @@ public class RequestApi {
         List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
 
         if (target.size() == 1 && target.get(0) != null){
-            List<HashMap<String, String>> values = request.get("values");
+//            List<HashMap<String, String>> values = request.get("values");
+            List<HashMap<String, String>> values = request.getValues();
             Space findSpace = spaceService.findById(target.get(0).getId());
 
             Request request1 = Request.create(values.get(0).get("title"), values.get(1).get("content"), findSpace);
@@ -276,7 +279,7 @@ public class RequestApi {
 
             Request findRequest = requestService.findById(requestId);
 
-            requestService.merger(target.get(0).getId(), requestId);
+            requestService.merge(target.get(0).getId(), requestId);
 
             alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_ACCEPTED);
 
