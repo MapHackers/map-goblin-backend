@@ -25,7 +25,6 @@ public class SpaceApi {
     private final AlarmService alarmService;
     private final LikeService likeService;
     private final CategoryService categoryService;
-    private final SpaceCategoryService spaceCategoryService;
 
     /**
      * Get all repositories
@@ -101,46 +100,7 @@ public class SpaceApi {
 
                 Space targetSpace = spaceService.findById(spaceResponse.getId());
 
-                List<String> collect = targetSpace.getCategories().stream()
-                        .map(spaceCategory -> {
-                            return spaceCategory.getCategory().getName();
-                        }).collect(Collectors.toList());
-
-                spaceResponse.setCategories(collect);
-
-                Space findSpace = spaceService.findById(spaceResponse.getId());
-                List<MemberSpace> findMembers = memberSpaceService.findBySpace(findSpace);
-
-                List<String> ownerList = findMembers.stream().map(memberSpace -> {
-                    return memberSpace.getMember().getUserId();
-                }).collect(Collectors.toList());
-
-                spaceResponse.setOwners(ownerList);
-
-                Likes alreadyLike = likeService.isAlreadyLike(member, targetSpace);
-
-                if(alreadyLike == null){
-                    spaceResponse.setLikeType(null);
-                }else{
-                    spaceResponse.setLikeType(alreadyLike.getType());
-                }
-
-                if (spaceResponse.getHostId() != null){
-                    Space byId = spaceService.findById(spaceResponse.getHostId());
-                    List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
-
-                    spaceResponse.setHostRepoName(byId.getName());
-
-                    String hostUserId = bySpace.get(0).getMember().getUserId();
-
-                    spaceResponse.setHostUserId(hostUserId);
-                }
-
-                if(findMember.getId().equals(member.getId())){
-                    spaceResponse.setAuthority("OWNER");
-                }else{
-                    spaceResponse.setAuthority("VIEWER");
-                }
+                setResponseInfo(spaceResponse, targetSpace, findMember, member);
 
                 return ResponseEntity.ok(spaceResponse);
             }else{
@@ -150,6 +110,65 @@ public class SpaceApi {
             e.printStackTrace();
 
             return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
+        }
+    }
+
+    private void setResponseInfo(SpaceResponse spaceResponse, Space targetSpace, Member findMember, Member member) {
+        setResponseCategories(spaceResponse, targetSpace);
+
+        setResponseOwners(spaceResponse, targetSpace);
+        
+        setResponseLike(spaceResponse, targetSpace, member);
+
+        setResponseHost(spaceResponse);
+
+        setResponseAuthority(spaceResponse, findMember, member);
+    }
+
+    private void setResponseCategories(SpaceResponse spaceResponse, Space targetSpace) {
+        List<String> categories = targetSpace.getCategories().stream()
+                .map(spaceCategory -> spaceCategory.getCategory().getName())
+                .collect(Collectors.toList());
+
+        spaceResponse.setCategories(categories);
+    }
+
+    private void setResponseOwners(SpaceResponse spaceResponse, Space targetSpace) {
+        List<MemberSpace> findMembers = memberSpaceService.findBySpace(targetSpace);
+
+        List<String> owners = findMembers.stream()
+                .map(memberSpace -> memberSpace.getMember().getUserId())
+                .collect(Collectors.toList());
+
+        spaceResponse.setOwners(owners);
+    }
+
+    private void setResponseLike(SpaceResponse spaceResponse, Space targetSpace, Member member) {
+        Likes alreadyLike = likeService.isAlreadyLike(member, targetSpace);
+
+        if(alreadyLike == null){
+            spaceResponse.setLikeType(null);
+        }else{
+            spaceResponse.setLikeType(alreadyLike.getType());
+        }
+    }
+
+    private void setResponseHost(SpaceResponse spaceResponse) {
+        Space byId = spaceService.findById(spaceResponse.getHostId());
+        List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
+
+        spaceResponse.setHostRepoName(byId.getName());
+
+        String hostUserId = bySpace.get(0).getMember().getUserId();
+
+        spaceResponse.setHostUserId(hostUserId);
+    }
+
+    private void setResponseAuthority(SpaceResponse spaceResponse, Member findMember, Member member) {
+        if(findMember.getId().equals(member.getId())){
+            spaceResponse.setAuthority("OWNER");
+        }else{
+            spaceResponse.setAuthority("VIEWER");
         }
     }
 
@@ -310,65 +329,5 @@ public class SpaceApi {
         }
 
         return ResponseEntity.ok(new ApiResult<>(resultSpaceDto));
-    }
-
-    /**
-     * Get specific category Repositories
-     *
-     * @Return
-     */
-    @GetMapping("/{categoryName}/repositories/category")
-    public ResponseEntity<?> findByCategory(@PathVariable String categoryName, @AuthenticationPrincipal Member member){
-        Category findCategory = categoryService.findByName(categoryName);
-
-        if(findCategory == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        List<SpaceCategory> spaceCategoryList = spaceCategoryService.findByCategoryId(findCategory.getId());
-
-        ArrayList<SpaceDto> resultSpaceDto = new ArrayList<>();
-
-        for(SpaceCategory spaceCategory: spaceCategoryList){
-            Space space = spaceCategory.getSpace();
-            Member createMember = memberService.findByUserId(space.getCreatedBy());
-
-            SpaceDto spaceDto = new SpaceDto(space,createMember);
-            resultSpaceDto.add(spaceDto);
-            List<MemberSpace> bySpace = memberSpaceService.findBySpace(space);
-            spaceDto.setOwnerId(bySpace.get(0).getMember().getUserId());
-
-            Likes alreadyLike = likeService.isAlreadyLike(member, space);
-
-            if(alreadyLike == null){
-                spaceDto.setLikeType(null);
-            }else{
-                spaceDto.setLikeType(alreadyLike.getType());
-            }
-        }
-
-        return ResponseEntity.ok(new ApiResult<>(resultSpaceDto));
-    }
-
-    @GetMapping("/categories")
-    public ResponseEntity<?> getCategories(){
-
-        List<HashMap<String, String>> result = new ArrayList<>();
-
-        List<Category> categories = categoryService.findAll();
-
-        if(categories != null){
-            for (Category category : categories) {
-                HashMap<String, String> categoryInfo = new HashMap<>();
-
-                categoryInfo.put("value", category.getName());
-
-                result.add(categoryInfo);
-            }
-
-            return ResponseEntity.ok(result);
-        }else{
-            return ApiResult.errorMessage("카테고리 목록이 없습니다.", HttpStatus.OK);
-        }
     }
 }
