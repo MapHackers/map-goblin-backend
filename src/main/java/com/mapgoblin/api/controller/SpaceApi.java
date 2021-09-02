@@ -83,26 +83,20 @@ public class SpaceApi {
     public ResponseEntity<?> getRepository(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
         List<SpaceResponse> list = null;
 
-        try{
-            Member findMember = memberService.findByUserId(userId);
+        Member findMember = memberService.findByUserId(userId);
 
-            list = spaceService.findOne(findMember.getId(), repositoryName);
+        list = spaceService.findOne(findMember.getId(), repositoryName);
 
-            if(list != null && list.size() > 0){
-                SpaceResponse spaceResponse = list.get(0);
+        if(list != null && list.size() > 0){
+            SpaceResponse spaceResponse = list.get(0);
 
-                Space targetSpace = spaceService.findById(spaceResponse.getId());
+            Space targetSpace = spaceService.findById(spaceResponse.getId());
 
-                setResponseInfo(spaceResponse, targetSpace, findMember, member);
+            setResponseInfo(spaceResponse, targetSpace, findMember, member);
 
-                return ResponseEntity.ok(spaceResponse);
-            }else{
-                return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-
-            return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
+            return ResponseEntity.ok(spaceResponse);
+        }else{
+            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -163,20 +157,16 @@ public class SpaceApi {
     public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
         List<SpaceResponse> list = null;
 
-        try{
-            list = spaceService.findOne(member.getId(), repositoryName);
+        list = spaceService.findOne(member.getId(), repositoryName);
 
-            if(list != null && list.size() > 0){
-                SpaceResponse spaceResponse = list.get(0);
+        if(list != null && list.size() > 0){
+            SpaceResponse spaceResponse = list.get(0);
 
-                spaceService.modify(spaceResponse.getId(), request);
+            spaceService.modify(spaceResponse.getId(), request);
 
-                return ResponseEntity.ok("ok");
-            }else{
-                return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
-            }
-        }catch (Exception e){
-            return ApiResult.errorMessage("조회 에러", HttpStatus.BAD_GATEWAY);
+            return ResponseEntity.ok("ok");
+        }else{
+            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -202,11 +192,7 @@ public class SpaceApi {
             return ApiResult.errorMessage("동일한 지도명이 존재합니다.", HttpStatus.CONFLICT);
         }
 
-        try{
-            response = spaceService.create(member.getId(), request);
-        }catch (Exception e){
-            return ApiResult.errorMessage("지도 생성 에러", HttpStatus.CONFLICT);
-        }
+        response = spaceService.create(member.getId(), request);
 
         return ResponseEntity.ok(response);
     }
@@ -221,30 +207,25 @@ public class SpaceApi {
     @PostMapping("/repositories/clone")
     public ResponseEntity<?> repositoryClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
 
-        CreateSpaceResponse response = null;
+        CreateSpaceResponse response;
 
-        try{
-            Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
+        Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
 
-            if (hostSpace == null){
-                return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
-            }
+        if (hostSpace == null){
+            return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
+        }
 
-            List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), cloneRequest.getRepositoryId());
+        List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), cloneRequest.getRepositoryId());
 
-            if (byMemberIdAndHostId.size() > 0){
-                return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
-            }
+        if (byMemberIdAndHostId.size() > 0){
+            return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
+        }
 
-            response = spaceService.clone(member.getId(), hostSpace);
+        response = spaceService.clone(member.getId(), hostSpace);
 
-            alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
+        alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
 
-            if(response == null){
-                return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
+        if(response == null){
             return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
         }
 
@@ -280,8 +261,7 @@ public class SpaceApi {
     }
 
     /**
-     * Get repositories what user liked
-     * 유저가 좋아요한 지도 목록 가져오기
+     * Get user liked repositories
      *
      * @return
      */
