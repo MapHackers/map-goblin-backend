@@ -29,7 +29,7 @@ public class SearchApi {
     private final SpaceService spaceService;
     private final MemberSpaceService memberSpaceService;
 
-    @GetMapping("/repositories/{keyword}")
+    @GetMapping("/spaces/{keyword}")
     public ResponseEntity<?> getSearchedRepositoryList(@PathVariable String keyword){
         List<Space> spaceList = spaceService.search(keyword);
 

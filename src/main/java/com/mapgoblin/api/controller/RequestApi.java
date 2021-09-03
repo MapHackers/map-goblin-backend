@@ -43,7 +43,7 @@ public class RequestApi {
      * @param pageable
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/requests")
+    @GetMapping("/{userId}/spaces/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
                                             @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
@@ -72,7 +72,7 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}")
+    @GetMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}")
     public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
         HashMap<String, List<HashMap<String, String>>> result = requestService.findRequestInfoById(requestId);
@@ -92,7 +92,7 @@ public class RequestApi {
      * @param repositoryName
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests")
     public ResponseEntity<?> create(/*@RequestBody HashMap<String, List<HashMap<String, String>>> request*/
             @RequestBody RequestDataDto request,
                                     @PathVariable String userId, @PathVariable String repositoryName) {
@@ -129,7 +129,7 @@ public class RequestApi {
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/compare")
+    @GetMapping("/{userId}/spaces/{repositoryName}/compare")
     public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String repositoryName,
                                                 @AuthenticationPrincipal Member member) {
 
@@ -170,7 +170,7 @@ public class RequestApi {
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/pull")
+    @PostMapping("/{userId}/spaces/{repositoryName}/pull")
     public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String repositoryName) throws CloneNotSupportedException {
 
         return ResponseEntity.ok("");
@@ -184,7 +184,7 @@ public class RequestApi {
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
+    @GetMapping("/{userId}/spaces/{repositoryName}/pull/compare")
     public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName,
                                              @AuthenticationPrincipal Member member){
 
@@ -233,7 +233,7 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
                                        @PathVariable String userId, @PathVariable String repositoryName,
                                        @PathVariable Long requestId){
@@ -268,7 +268,7 @@ public class RequestApi {
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/merge")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/merge")
     public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId) throws CloneNotSupportedException {
 
         Member findMember = memberService.findByUserId(userId);
@@ -297,7 +297,7 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/denied")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/denied")
     public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
         Member findMember = memberService.findByUserId(userId);

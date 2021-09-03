@@ -26,12 +26,12 @@ public class SpaceApi {
     private final LikeService likeService;
 
     /**
-     * Get all repositories
+     * Get all spaces
      *
      * @return
      */
-    @GetMapping("/repositories")
-    public ResponseEntity<?> getRepositoryList(@AuthenticationPrincipal Member member) {
+    @GetMapping("/spaces")
+    public ResponseEntity<?> getSpaceList(@AuthenticationPrincipal Member member) {
 
         List<Space> spaceList = spaceService.findAll();
 
@@ -52,8 +52,8 @@ public class SpaceApi {
         return ResponseEntity.ok(new ApiResult(collect));
     }
 
-    @GetMapping("{userId}/repositories")
-    public ResponseEntity<?> getMyRepositoryList(@PathVariable String userId){
+    @GetMapping("{userId}/spaces")
+    public ResponseEntity<?> getMySpaceList(@PathVariable String userId){
         Member findMember = memberService.findByUserId(userId);
 
         List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(findMember);
@@ -79,8 +79,8 @@ public class SpaceApi {
         return alreadyLike == null ? null : alreadyLike.getType();
     }
 
-    @GetMapping("/{userId}/repositories/{repositoryName}")
-    public ResponseEntity<?> getRepository(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
+    @GetMapping("/{userId}/spaces/{repositoryName}")
+    public ResponseEntity<?> getSpace(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
         List<SpaceResponse> list = null;
 
         Member findMember = memberService.findByUserId(userId);
@@ -153,7 +153,7 @@ public class SpaceApi {
         }
     }
 
-    @PostMapping("/{userId}/repositories/{repositoryName}")
+    @PostMapping("/{userId}/spaces/{repositoryName}")
     public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
         List<SpaceResponse> list = null;
 
@@ -177,7 +177,7 @@ public class SpaceApi {
      * @param member
      * @return
      */
-    @PostMapping("/repositories")
+    @PostMapping("/spaces")
     public ResponseEntity<?> create(@RequestBody CreateSpaceRequest request, @AuthenticationPrincipal Member member) {
 
         List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
@@ -204,8 +204,8 @@ public class SpaceApi {
      * @param member
      * @return
      */
-    @PostMapping("/repositories/clone")
-    public ResponseEntity<?> repositoryClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
+    @PostMapping("/spaces/clone")
+    public ResponseEntity<?> spaceClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
 
         CreateSpaceResponse response;
 
@@ -232,8 +232,8 @@ public class SpaceApi {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/repositories/{id}/delete")
-    public ResponseEntity<?> repositoryDelete(@PathVariable Long id,  @AuthenticationPrincipal Member member){
+    @PostMapping("/spaces/{id}/delete")
+    public ResponseEntity<?> spaceDelete(@PathVariable Long id,  @AuthenticationPrincipal Member member){
         Space findSpace = spaceService.findById(id);
         Boolean checkHost = false;
 
@@ -261,12 +261,12 @@ public class SpaceApi {
     }
 
     /**
-     * Get user liked repositories
+     * Get user liked spaces
      *
      * @return
      */
-    @GetMapping("/{userId}/repositories/likes")
-    public ResponseEntity<?> findRepositoryWhatUserLiked(@PathVariable Long userId){
+    @GetMapping("/{userId}/spaces/likes")
+    public ResponseEntity<?> getUserLikedSpaceList(@PathVariable Long userId){
         Member findMember = memberService.findById(userId);
 
         List<Likes> spaceIdList = likeService.findByMemberId(userId);

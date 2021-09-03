@@ -34,7 +34,7 @@ public class SpaceService {
     private final RequestRepository requestRepository;
 
     /**
-     * Find all repositories
+     * Find all spaces
      *
      * @return
      */

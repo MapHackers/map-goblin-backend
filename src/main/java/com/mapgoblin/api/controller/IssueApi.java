@@ -44,7 +44,7 @@ public class IssueApi {
      * @param repositoryName
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/issues")
+    @PostMapping("/{userId}/spaces/{repositoryName}/issues")
     public ResponseEntity<?> create(@RequestBody CreateIssueRequest request,
                                     @PathVariable String userId, @PathVariable String repositoryName){
 
@@ -72,7 +72,7 @@ public class IssueApi {
      * @param repositoryName
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/issues")
+    @GetMapping("/{userId}/spaces/{repositoryName}/issues")
     public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName,
                                           @RequestParam String status,
                                           @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -105,7 +105,7 @@ public class IssueApi {
      * @param id
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
+    @GetMapping("/{userId}/spaces/{repositoryName}/issues/{id}")
     public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
         Issue issue = issueService.findIssueById(id);
@@ -124,7 +124,7 @@ public class IssueApi {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}/check")
+    @PostMapping("/{userId}/spaces/{repositoryName}/issues/{id}/check")
     public ResponseEntity<?> checkIssue(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
         if(issueService.setChecked(id)){
 
