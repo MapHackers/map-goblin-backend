@@ -26,51 +26,200 @@ public class SpaceApi {
     private final LikeService likeService;
 
     /**
-     * Get all repositories
+     * Get all spaces
      *
      * @return
      */
-    @GetMapping("/repositories")
-    public ResponseEntity<?> getRepositoryList(@AuthenticationPrincipal Member member) {
+    @GetMapping("/spaces")
+    public ResponseEntity<?> getSpaceList(@AuthenticationPrincipal Member member) {
 
         List<Space> spaceList = spaceService.findAll();
 
-        List<SpaceDto> collect = spaceList.stream()
+        List<SpaceDto> results = spaceList.stream()
                 .map(space -> {
-                    MemberSpace memberSpace = memberSpaceService.findBySpace(space).stream().findFirst().orElse(null);
                     Member createMember = memberService.findByUserId(space.getCreatedBy());
+
                     SpaceDto spaceDto = new SpaceDto(space, createMember);
-
-                    spaceDto.setOwnerId(memberSpace.getMember().getUserId());
-
                     spaceDto.setLikeType(getLikeTypeByMember(member, space));
 
                     return spaceDto;
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new ApiResult(collect));
+        return ResponseEntity.ok(new ApiResult(results));
     }
 
-    @GetMapping("{userId}/repositories")
-    public ResponseEntity<?> getMyRepositoryList(@PathVariable String userId){
-        Member findMember = memberService.findByUserId(userId);
+    @GetMapping("{userId}/spaces")
+    public ResponseEntity<?> getMySpaceList(@PathVariable String userId){
+        Member spaceMember = memberService.findByUserId(userId);
 
-        List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(findMember);
+        List<MemberSpace> memberSpaces = memberSpaceService.findSpacesOfMember(spaceMember);
 
-        List<SpaceDto> collect = spacesOfMember.stream()
+        List<SpaceDto> results = memberSpaces.stream()
                 .map(memberSpace -> {
                     Space space = memberSpace.getSpace();
 
-                    SpaceDto spaceDto = new SpaceDto(space);
-
-                    spaceDto.setLikeType(getLikeTypeByMember(findMember, space));
+                    SpaceDto spaceDto = new SpaceDto(space, memberSpace.getMember());
+                    spaceDto.setLikeType(getLikeTypeByMember(spaceMember, space));
 
                     return spaceDto;
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new ApiResult(collect));
+        return ResponseEntity.ok(new ApiResult(results));
+    }
+
+    @GetMapping("/{userId}/spaces/{spaceName}")
+    public ResponseEntity<?> getSpace(@PathVariable String userId, @PathVariable String spaceName, @AuthenticationPrincipal Member member){
+        Member spaceMember = memberService.findByUserId(userId);
+
+        SpaceResponse spaceResponse = spaceService.findOne(spaceMember.getId(), spaceName);
+
+        if(spaceResponse != null){
+            Space targetSpace = spaceService.findById(spaceResponse.getId());
+
+            setResponseInfo(spaceResponse, targetSpace, spaceMember, member);
+
+            return ResponseEntity.ok(spaceResponse);
+        }else{
+            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/{userId}/spaces/{spaceName}")
+    public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String spaceName, @AuthenticationPrincipal Member member){
+        SpaceResponse spaceResponse =
+                spaceService.findOne(member.getId(), spaceName);
+
+        if(spaceResponse != null){
+            spaceService.modify(spaceResponse.getId(), request);
+
+            return ResponseEntity.ok("ok");
+        }else{
+            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Create repository
+     *
+     * @param request
+     * @param member
+     * @return
+     */
+    @PostMapping("/spaces")
+    public ResponseEntity<?> create(@RequestBody CreateSpaceRequest request, @AuthenticationPrincipal Member member) {
+
+        List<MemberSpace> memberSpaces = memberSpaceService.findSpacesOfMember(member);
+
+        CreateSpaceResponse response;
+
+        List<String> spaceNames = memberSpaces.stream()
+                .map(memberSpace -> memberSpace.getSpace().getName())
+                .collect(Collectors.toList());
+
+        if(spaceNames.contains(request.getName())){
+            return ApiResult.errorMessage("동일한 지도명이 존재합니다.", HttpStatus.CONFLICT);
+        }
+
+        response = spaceService.create(member.getId(), request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Clone repository
+     *
+     * @param cloneRequest
+     * @param member
+     * @return
+     */
+    @PostMapping("/spaces/clone")
+    public ResponseEntity<?> spaceClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
+
+        Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
+
+        if (hostSpace == null){
+            return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
+        }
+
+        SpaceResponse spaceResponse = spaceService.findOne(member.getId(), cloneRequest.getRepositoryId());
+
+        if (spaceResponse != null){
+            return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
+        }
+
+        CreateSpaceResponse result = spaceService.clone(member.getId(), hostSpace);
+
+        alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
+
+        if(result == null){
+            return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/spaces/{id}/delete")
+    public ResponseEntity<?> spaceDelete(@PathVariable Long id,  @AuthenticationPrincipal Member member){
+        Space findSpace = spaceService.findById(id);
+        boolean checkHost = false;
+
+        if (findSpace == null) {
+            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
+        }
+
+        List<MemberSpace> findMemberSpace = memberSpaceService.findBySpace(findSpace);
+
+        for (MemberSpace memberSpace : findMemberSpace) {
+            if(memberSpace.getMember().getId().equals(member.getId())){
+                checkHost = true;
+
+                break;
+            }
+        }
+
+        if(!checkHost){
+            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
+        }
+
+        spaceService.delete(findSpace);
+
+        return ResponseEntity.ok(true);
+    }
+
+    /**
+     * Get user liked spaces
+     *
+     * @return
+     */
+    @GetMapping("/{userId}/spaces/likes")
+    public ResponseEntity<?> getUserLikedSpaceList(@PathVariable Long userId){
+        Member member = memberService.findById(userId);
+
+        List<Likes> likes = likeService.findByMemberId(userId);
+
+        if(likes == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<SpaceDto> results = likes.stream()
+                .map(like -> {
+                    Space space = like.getSpace();
+                    Member createMember = memberService.findByUserId(space.getCreatedBy());
+
+                    SpaceDto spaceDto = new SpaceDto(space, createMember);
+
+                    MemberSpace memberSpace = memberSpaceService.findBySpace(space).stream().findFirst().orElse(null);
+
+                    spaceDto.setOwnerId(memberSpace.getMember().getUserId());
+
+                    spaceDto.setLikeType(getLikeTypeByMember(member, space));
+
+                    return spaceDto;
+                }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ApiResult<>(results));
     }
 
     private LikeType getLikeTypeByMember(Member member, Space space) {
@@ -79,32 +228,11 @@ public class SpaceApi {
         return alreadyLike == null ? null : alreadyLike.getType();
     }
 
-    @GetMapping("/{userId}/repositories/{repositoryName}")
-    public ResponseEntity<?> getRepository(@PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
-        List<SpaceResponse> list = null;
-
-        Member findMember = memberService.findByUserId(userId);
-
-        list = spaceService.findOne(findMember.getId(), repositoryName);
-
-        if(list != null && list.size() > 0){
-            SpaceResponse spaceResponse = list.get(0);
-
-            Space targetSpace = spaceService.findById(spaceResponse.getId());
-
-            setResponseInfo(spaceResponse, targetSpace, findMember, member);
-
-            return ResponseEntity.ok(spaceResponse);
-        }else{
-            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
-        }
-    }
-
     private void setResponseInfo(SpaceResponse spaceResponse, Space targetSpace, Member findMember, Member member) {
         setResponseCategories(spaceResponse, targetSpace);
 
         setResponseOwners(spaceResponse, targetSpace);
-        
+
         setResponseLike(spaceResponse, targetSpace, member);
 
         setResponseHost(spaceResponse);
@@ -135,14 +263,16 @@ public class SpaceApi {
     }
 
     private void setResponseHost(SpaceResponse spaceResponse) {
-        Space byId = spaceService.findById(spaceResponse.getHostId());
-        List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
+        if(spaceResponse.getHostId() != null) {
+            Space byId = spaceService.findById(spaceResponse.getHostId());
+            List<MemberSpace> bySpace = memberSpaceService.findBySpace(byId);
 
-        spaceResponse.setHostRepoName(byId.getName());
+            spaceResponse.setHostRepoName(byId.getName());
 
-        String hostUserId = bySpace.get(0).getMember().getUserId();
+            String hostUserId = bySpace.get(0).getMember().getUserId();
 
-        spaceResponse.setHostUserId(hostUserId);
+            spaceResponse.setHostUserId(hostUserId);
+        }
     }
 
     private void setResponseAuthority(SpaceResponse spaceResponse, Member findMember, Member member) {
@@ -151,146 +281,5 @@ public class SpaceApi {
         }else{
             spaceResponse.setAuthority("VIEWER");
         }
-    }
-
-    @PostMapping("/{userId}/repositories/{repositoryName}")
-    public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String repositoryName, @AuthenticationPrincipal Member member){
-        List<SpaceResponse> list = null;
-
-        list = spaceService.findOne(member.getId(), repositoryName);
-
-        if(list != null && list.size() > 0){
-            SpaceResponse spaceResponse = list.get(0);
-
-            spaceService.modify(spaceResponse.getId(), request);
-
-            return ResponseEntity.ok("ok");
-        }else{
-            return ApiResult.errorMessage("없는 지도입니다.", HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    /**
-     * Create repository
-     *
-     * @param request
-     * @param member
-     * @return
-     */
-    @PostMapping("/repositories")
-    public ResponseEntity<?> create(@RequestBody CreateSpaceRequest request, @AuthenticationPrincipal Member member) {
-
-        List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
-
-        CreateSpaceResponse response = null;
-
-        List<String> spaceNames = spacesOfMember.stream()
-                .map(memberSpace -> memberSpace.getSpace().getName())
-                .collect(Collectors.toList());
-
-        if(spaceNames.contains(request.getName())){
-            return ApiResult.errorMessage("동일한 지도명이 존재합니다.", HttpStatus.CONFLICT);
-        }
-
-        response = spaceService.create(member.getId(), request);
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Clone repository
-     *
-     * @param cloneRequest
-     * @param member
-     * @return
-     */
-    @PostMapping("/repositories/clone")
-    public ResponseEntity<?> repositoryClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
-
-        CreateSpaceResponse response;
-
-        Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
-
-        if (hostSpace == null){
-            return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
-        }
-
-        List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), cloneRequest.getRepositoryId());
-
-        if (byMemberIdAndHostId.size() > 0){
-            return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
-        }
-
-        response = spaceService.clone(member.getId(), hostSpace);
-
-        alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
-
-        if(response == null){
-            return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);
-        }
-
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/repositories/{id}/delete")
-    public ResponseEntity<?> repositoryDelete(@PathVariable Long id,  @AuthenticationPrincipal Member member){
-        Space findSpace = spaceService.findById(id);
-        Boolean checkHost = false;
-
-        if (findSpace == null) {
-            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
-        }
-
-        List<MemberSpace> findMemberSpace = memberSpaceService.findBySpace(findSpace);
-
-        for (MemberSpace memberSpace : findMemberSpace) {
-            if(memberSpace.getMember().getId().equals(member.getId())){
-                checkHost = true;
-
-                break;
-            }
-        }
-
-        if(!checkHost){
-            return ApiResult.errorMessage("잘못된 접근", HttpStatus.BAD_REQUEST);
-        }
-
-        spaceService.delete(findSpace);
-
-        return ResponseEntity.ok(checkHost);
-    }
-
-    /**
-     * Get user liked repositories
-     *
-     * @return
-     */
-    @GetMapping("/{userId}/repositories/likes")
-    public ResponseEntity<?> findRepositoryWhatUserLiked(@PathVariable Long userId){
-        Member findMember = memberService.findById(userId);
-
-        List<Likes> spaceIdList = likeService.findByMemberId(userId);
-
-        if(spaceIdList == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        List<SpaceDto> results = spaceIdList.stream()
-                .map(like -> {
-                    Space space = like.getSpace();
-                    Member createMember = memberService.findByUserId(space.getCreatedBy());
-
-                    SpaceDto spaceDto = new SpaceDto(space, createMember);
-
-                    MemberSpace memberSpace = memberSpaceService.findBySpace(space).stream().findFirst().orElse(null);
-
-                    spaceDto.setOwnerId(memberSpace.getMember().getUserId());
-
-                    spaceDto.setLikeType(getLikeTypeByMember(findMember, space));
-
-                    return spaceDto;
-                }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(new ApiResult<>(results));
     }
 }

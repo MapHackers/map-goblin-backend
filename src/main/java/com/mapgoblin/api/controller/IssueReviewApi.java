@@ -24,7 +24,7 @@ public class IssueReviewApi {
     private final IssueReviewService issueReviewService;
     private final MemberService memberService;
 
-    @PostMapping("/{userId}/repositories/{repositoryName}/issues/{id}")
+    @PostMapping("/{userId}/spaces/{repositoryName}/issues/{id}")
     public ResponseEntity<?> create(@RequestBody CreateIssueReviewRequest request, @PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
 
         Member findMember = memberService.findByUserId(userId);

@@ -43,17 +43,17 @@ public class RequestApi {
      * @param pageable
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/requests")
+    @GetMapping("/{userId}/spaces/{repositoryName}/requests")
     public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
                                             @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null){
-            Space space = spaceService.findById(target.get(0).getId());
+        if (spaceResponse != null){
+            Space space = spaceService.findById(spaceResponse.getId());
 
             Page<RequestDto> result = requestService.findRequestsOfSpace(space, RequestStatus.valueOf(status), pageable);
 
@@ -72,7 +72,7 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}")
+    @GetMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}")
     public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
         HashMap<String, List<HashMap<String, String>>> result = requestService.findRequestInfoById(requestId);
@@ -92,19 +92,19 @@ public class RequestApi {
      * @param repositoryName
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests")
     public ResponseEntity<?> create(/*@RequestBody HashMap<String, List<HashMap<String, String>>> request*/
             @RequestBody RequestDataDto request,
                                     @PathVariable String userId, @PathVariable String repositoryName) {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null){
+        if (spaceResponse != null){
 //            List<HashMap<String, String>> values = request.get("values");
             List<HashMap<String, String>> values = request.getValues();
-            Space findSpace = spaceService.findById(target.get(0).getId());
+            Space findSpace = spaceService.findById(spaceResponse.getId());
 
             Request request1 = Request.create(values.get(0).get("title"), values.get(1).get("content"), findSpace);
 
@@ -129,7 +129,7 @@ public class RequestApi {
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/compare")
+    @GetMapping("/{userId}/spaces/{repositoryName}/compare")
     public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String repositoryName,
                                                 @AuthenticationPrincipal Member member) {
 
@@ -137,15 +137,15 @@ public class RequestApi {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse originSpaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null){
+        if (originSpaceResponse != null){
 
-            List<SpaceResponse> byMemberIdAndHostId = spaceService.findByMemberIdAndHostId(member.getId(), target.get(0).getId());
+            SpaceResponse clonedSpaceResponse = spaceService.findOne(member.getId(), originSpaceResponse.getId());
 
-            if(byMemberIdAndHostId.size() == 1 && byMemberIdAndHostId.get(0) != null){
+            if(clonedSpaceResponse != null){
 
-                result = requestService.compareMapData(target.get(0).getId(), byMemberIdAndHostId.get(0).getId());
+                result = requestService.compareMapData(originSpaceResponse.getId(), clonedSpaceResponse.getId());
 
                 if(result.isEmpty()){
                     return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
@@ -170,7 +170,7 @@ public class RequestApi {
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/pull")
+    @PostMapping("/{userId}/spaces/{repositoryName}/pull")
     public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String repositoryName) throws CloneNotSupportedException {
 
         return ResponseEntity.ok("");
@@ -184,7 +184,7 @@ public class RequestApi {
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/repositories/{repositoryName}/pull/compare")
+    @GetMapping("/{userId}/spaces/{repositoryName}/pull/compare")
     public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName,
                                              @AuthenticationPrincipal Member member){
 
@@ -192,12 +192,12 @@ public class RequestApi {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null && target.get(0).getSource() == SourceType.CLONE){
+        if (spaceResponse != null && spaceResponse.getSource() == SourceType.CLONE){
 
             List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
-            Space clonedSpace = spaceService.findById(target.get(0).getId());
+            Space clonedSpace = spaceService.findById(spaceResponse.getId());
             boolean ownerCheck = true;
 
             for (MemberSpace memberSpace : spacesOfMember) {
@@ -211,7 +211,7 @@ public class RequestApi {
                 return ApiResult.errorMessage("주인이 아닙니다.", HttpStatus.OK);
             }
 
-            result = requestService.comparePullData(target.get(0).getHostId(), clonedSpace);
+            result = requestService.comparePullData(spaceResponse.getHostId(), clonedSpace);
 
             if(result.isEmpty()){
                 return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
@@ -233,7 +233,7 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/reply")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
                                        @PathVariable String userId, @PathVariable String repositoryName,
                                        @PathVariable Long requestId){
@@ -268,20 +268,20 @@ public class RequestApi {
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/merge")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/merge")
     public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId) throws CloneNotSupportedException {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null){
+        if (spaceResponse != null){
 
             Request findRequest = requestService.findById(requestId);
 
-            requestService.merge(target.get(0).getId(), requestId);
+            requestService.merge(spaceResponse.getId(), requestId);
 
-            alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_ACCEPTED);
+            alarmService.createAlarm(findRequest.getCreatedBy(), spaceResponse.getId(), AlarmType.REQUEST_ACCEPTED);
 
             return ResponseEntity.ok("merge");
         }else{
@@ -297,20 +297,20 @@ public class RequestApi {
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/repositories/{repositoryName}/requests/{requestId}/denied")
+    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/denied")
     public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null){
+        if (spaceResponse != null){
 
             Request findRequest = requestService.findById(requestId);
 
             requestService.denied(requestId);
 
-            alarmService.createAlarm(findRequest.getCreatedBy(), target.get(0).getId(), AlarmType.REQUEST_DENIED);
+            alarmService.createAlarm(findRequest.getCreatedBy(), spaceResponse.getId(), AlarmType.REQUEST_DENIED);
 
             return ResponseEntity.ok("denied");
 

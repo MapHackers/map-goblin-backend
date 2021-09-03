@@ -49,11 +49,11 @@ public class CategoryApi {
     }
 
     /**
-     * Get specific category Repositories
+     * Get specific category spaces
      *
      * @Return
      */
-    @GetMapping("/{categoryName}/repositories/category")
+    @GetMapping("/{categoryName}/spaces/category")
     public ResponseEntity<?> findByCategory(@PathVariable String categoryName, @AuthenticationPrincipal Member member){
         Category findCategory = categoryService.findByName(categoryName);
 

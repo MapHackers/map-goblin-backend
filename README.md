@@ -106,7 +106,7 @@
 
 ### 지도 레포지토리 API
 
-`HTTP GET /api/repositories`
+`HTTP GET /api/spaces`
 
 ```json
 200 OK
@@ -154,7 +154,7 @@
 
 <br/>
 
-`HTTP POST /api/repositories`
+`HTTP POST /api/spaces`
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -177,7 +177,7 @@
 
 <br/>
 
-`HTTP GET /api/repositories/{id}`
+`HTTP GET /api/spaces/{id}`
 
 | Parameter | Type | Description |
 |---|---|---|

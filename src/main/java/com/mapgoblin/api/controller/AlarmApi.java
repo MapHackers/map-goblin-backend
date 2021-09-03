@@ -1,13 +1,10 @@
 package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
-import com.mapgoblin.api.dto.alarm.AlarmDto;
 import com.mapgoblin.api.dto.alarm.AlarmIdDto;
 import com.mapgoblin.api.dto.alarm.AlarmResponse;
 import com.mapgoblin.domain.Alarm;
 import com.mapgoblin.domain.Member;
-import com.mapgoblin.domain.Space;
-import com.mapgoblin.domain.base.AlarmType;
 import com.mapgoblin.service.AlarmService;
 import com.mapgoblin.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +38,6 @@ public class AlarmApi {
         for (Alarm alarm:alarms
              ) {
             Member member = memberService.findByUserId(alarm.getCreatedBy());
-            System.out.println("@@@@@@@@@@@@@@" + alarm.getCreatedDate());
             if (member != null) {
                 alarmResponseList.add(new AlarmResponse(alarm, member.getName()));
             }
@@ -76,19 +71,4 @@ public class AlarmApi {
         }
 
     }
-
-
-//    @PostMapping("/alarms")
-//    public ResponseEntity<?> create(@RequestBody AlarmDto request){
-//        List<AlarmResponse> alarmList = null;
-//
-//        try{
-//            alarmList = alarmService.save(request.getSpaceId(), request.getType());
-//            if(alarmList==null){ return ApiResult.errorMessage("알맞지 않은 request Ex) spaceId", HttpStatus.BAD_REQUEST); }
-//        }catch(Exception e){
-//            return ApiResult.errorMessage("알람 생성 에러", HttpStatus.BAD_REQUEST);
-//        }
-//
-//        return ResponseEntity.ok(new ApiResult(alarmList));
-//    }
 }
