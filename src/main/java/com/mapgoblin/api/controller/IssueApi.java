@@ -50,10 +50,10 @@ public class IssueApi {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.get(0) != null && target.size() == 1) {
-            Space space = spaceService.findById(target.get(0).getId());
+        if (spaceResponse != null) {
+            Space space = spaceService.findById(spaceResponse.getId());
 
             Issue issue = Issue.create(request.getTitle(), request.getContent(), space);
 
@@ -79,10 +79,10 @@ public class IssueApi {
 
         Member findMember = memberService.findByUserId(userId);
 
-        List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-        if (target.size() == 1 && target.get(0) != null) {
-            Space space = spaceService.findById(target.get(0).getId());
+        if (spaceResponse != null) {
+            Space space = spaceService.findById(spaceResponse.getId());
 
             Page<GetIssueResponse> result = issueService.findBySpace(space, IssueStatus.valueOf(status), pageable);
 
@@ -130,12 +130,12 @@ public class IssueApi {
 
             Member findMember = memberService.findByUserId(userId);
 
-            List<SpaceResponse> target = spaceService.findOne(findMember.getId(), repositoryName);
+            SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
 
-            if (target.size() == 1 && target.get(0) != null){
+            if (spaceResponse != null){
                 Issue issue = issueService.findIssueById(id);
 
-                alarmService.createAlarm(issue.getCreatedBy(), target.get(0).getId(), AlarmType.ISSUE_OK);
+                alarmService.createAlarm(issue.getCreatedBy(), spaceResponse.getId(), AlarmType.ISSUE_OK);
 
                 return new ResponseEntity<>(HttpStatus.OK);
             }else {

@@ -71,15 +71,11 @@ public class SpaceApi {
 
     @GetMapping("/{userId}/spaces/{spaceName}")
     public ResponseEntity<?> getSpace(@PathVariable String userId, @PathVariable String spaceName, @AuthenticationPrincipal Member member){
-        List<SpaceResponse> list;
-
         Member spaceMember = memberService.findByUserId(userId);
 
-        list = spaceService.findOne(spaceMember.getId(), spaceName);
+        SpaceResponse spaceResponse = spaceService.findOne(spaceMember.getId(), spaceName);
 
-        if(list != null && list.size() > 0){
-            SpaceResponse spaceResponse = list.get(0);
-
+        if(spaceResponse != null){
             Space targetSpace = spaceService.findById(spaceResponse.getId());
 
             setResponseInfo(spaceResponse, targetSpace, spaceMember, member);
@@ -93,10 +89,7 @@ public class SpaceApi {
     @PostMapping("/{userId}/spaces/{spaceName}")
     public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String spaceName, @AuthenticationPrincipal Member member){
         SpaceResponse spaceResponse =
-                spaceService.findOne(member.getId(), spaceName)
-                        .stream()
-                        .findFirst()
-                        .orElse(null);
+                spaceService.findOne(member.getId(), spaceName);
 
         if(spaceResponse != null){
             spaceService.modify(spaceResponse.getId(), request);
@@ -150,9 +143,9 @@ public class SpaceApi {
             return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
         }
 
-        List<SpaceResponse> SpaceResponses = spaceService.findByMemberIdAndHostId(member.getId(), cloneRequest.getRepositoryId());
+        SpaceResponse spaceResponse = spaceService.findOne(member.getId(), cloneRequest.getRepositoryId());
 
-        if (SpaceResponses.size() > 0){
+        if (spaceResponse != null){
             return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
         }
 

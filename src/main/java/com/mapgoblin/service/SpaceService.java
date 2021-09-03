@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,10 +48,26 @@ public class SpaceService {
      * @param repoName
      * @return
      */
-    public List<SpaceResponse> findOne(Long memberId, String repoName){
+    public SpaceResponse findOne(Long memberId, String repoName){
 
-        return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName);
+        return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName)
+                .stream()
+                .findFirst()
+                .orElse(null);
 
+    }
+
+    /**
+     *
+     * @param memberId
+     * @param hostId
+     * @return
+     */
+    public SpaceResponse findOne(Long memberId, Long hostId){
+        return memberSpaceRepository.findByMemberIdAndHostId(memberId, hostId)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -62,16 +77,6 @@ public class SpaceService {
      */
     public Space findById(Long spaceId){
         return spaceRepository.findById(spaceId).orElse(null);
-    }
-
-    /**
-     *
-     * @param memberId
-     * @param hostId
-     * @return
-     */
-    public List<SpaceResponse> findByMemberIdAndHostId(Long memberId, Long hostId){
-        return memberSpaceRepository.findByMemberIdAndHostId(memberId, hostId);
     }
 
     /**
