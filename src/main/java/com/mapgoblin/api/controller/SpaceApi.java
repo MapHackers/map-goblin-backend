@@ -88,8 +88,7 @@ public class SpaceApi {
 
     @PostMapping("/{userId}/spaces/{spaceName}")
     public ResponseEntity<?> modifyInfo(@RequestBody CreateSpaceRequest request, @PathVariable String userId, @PathVariable String spaceName, @AuthenticationPrincipal Member member){
-        SpaceResponse spaceResponse =
-                spaceService.findOne(member.getId(), spaceName);
+        SpaceResponse spaceResponse = spaceService.findOne(member.getId(), spaceName);
 
         if(spaceResponse != null){
             spaceService.modify(spaceResponse.getId(), request);

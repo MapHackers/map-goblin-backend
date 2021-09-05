@@ -49,7 +49,6 @@ public class SpaceService {
      * @return
      */
     public SpaceResponse findOne(Long memberId, String repoName){
-
         return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName)
                 .stream()
                 .findFirst()
