@@ -1,9 +1,7 @@
 package com.mapgoblin.api.controller;
 
 import com.mapgoblin.api.dto.ApiResult;
-import com.mapgoblin.api.dto.request.CompareDto;
-import com.mapgoblin.api.dto.request.RequestDataDto;
-import com.mapgoblin.api.dto.request.RequestDto;
+import com.mapgoblin.api.dto.request.*;
 import com.mapgoblin.api.dto.space.SpaceResponse;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.AlarmType;
@@ -30,7 +28,6 @@ public class RequestApi {
     private final RequestService requestService;
     private final SpaceService spaceService;
     private final MemberService memberService;
-    private final RequestDataService requestDataService;
     private final AlarmService alarmService;
     private final MemberSpaceService memberSpaceService;
 
@@ -38,19 +35,18 @@ public class RequestApi {
      * 요청사항 리스트 조회
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param status
      * @param pageable
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/requests")
-    public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String repositoryName, @RequestParam String status,
+    @GetMapping("/{userId}/spaces/{spaceName}/requests")
+    public ResponseEntity<?> getRequestList(@PathVariable String userId, @PathVariable String spaceName, @RequestParam String status,
                                             @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
-
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null){
             Space space = spaceService.findById(spaceResponse.getId());
@@ -68,14 +64,14 @@ public class RequestApi {
      * 요청사항 상세 조회
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param requestId
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}")
-    public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+    @GetMapping("/{userId}/spaces/{spaceName}/requests/{requestId}")
+    public ResponseEntity<?> getRequestInfo(@PathVariable String userId, @PathVariable String spaceName, @PathVariable Long requestId){
 
-        HashMap<String, List<HashMap<String, String>>> result = requestService.findRequestInfoById(requestId);
+        RequestDataDto result = requestService.findRequestInfoById(requestId);
 
         if(result != null){
             return ResponseEntity.ok(result);
@@ -87,30 +83,28 @@ public class RequestApi {
     /**
      * 요청사항 생성
      *
-     * @param request
+     * @param requestData
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @return
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/requests")
-    public ResponseEntity<?> create(/*@RequestBody HashMap<String, List<HashMap<String, String>>> request*/
-            @RequestBody RequestDataDto request,
-                                    @PathVariable String userId, @PathVariable String repositoryName) {
+    @PostMapping("/{userId}/spaces/{spaceName}/requests")
+    public ResponseEntity<?> create(@RequestBody RequestDataDto requestData,
+                                    @PathVariable String userId, @PathVariable String spaceName) {
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null){
-//            List<HashMap<String, String>> values = request.get("values");
-            List<HashMap<String, String>> values = request.getValues();
+            List<ValueDto> values = requestData.getValues();
             Space findSpace = spaceService.findById(spaceResponse.getId());
 
-            Request request1 = Request.create(values.get(0).get("title"), values.get(1).get("content"), findSpace);
+            Request request = Request.create(values.get(0).getTitle(), values.get(1).getContent(), findSpace);
 
             HashMap<String, Long> result = new HashMap<>();
 
-            result.put("requestId", requestService.save(request1, request));
+            result.put("requestId", requestService.save(request, requestData));
 
             alarmService.save(findSpace.getId(), AlarmType.REQUEST);
 
@@ -125,19 +119,19 @@ public class RequestApi {
      * 원본지도와 복제지도 변경사항 감지
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/compare")
-    public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String repositoryName,
+    @GetMapping("/{userId}/spaces/{spaceName}/compare")
+    public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String spaceName,
                                                 @AuthenticationPrincipal Member member) {
 
         HashMap<String, List<CompareDto>> result;
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse originSpaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse originSpaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (originSpaceResponse != null){
 
@@ -166,12 +160,12 @@ public class RequestApi {
      * 원본지도 변경 데이터 받아오기
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/pull")
-    public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String repositoryName) throws CloneNotSupportedException {
+    @PostMapping("/{userId}/spaces/{spaceName}/pull")
+    public ResponseEntity<?> pullData(@PathVariable String userId, @PathVariable String spaceName) throws CloneNotSupportedException {
 
         return ResponseEntity.ok("");
     }
@@ -180,19 +174,19 @@ public class RequestApi {
      * 원본지도 변경 데이터 감지
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param member
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/pull/compare")
-    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String repositoryName,
+    @GetMapping("/{userId}/spaces/{spaceName}/pull/compare")
+    public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String spaceName,
                                              @AuthenticationPrincipal Member member){
 
         HashMap<String, List<CompareDto>> result;
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null && spaceResponse.getSource() == SourceType.CLONE){
 
@@ -229,13 +223,13 @@ public class RequestApi {
      *
      * @param request
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/reply")
+    @PostMapping("/{userId}/spaces/{spaceName}/requests/{requestId}/reply")
     public ResponseEntity<?> saveReply(@RequestBody HashMap<String, String> request,
-                                       @PathVariable String userId, @PathVariable String repositoryName,
+                                       @PathVariable String userId, @PathVariable String spaceName,
                                        @PathVariable Long requestId){
 
         HashMap<String, String> result = new HashMap<>();
@@ -263,17 +257,17 @@ public class RequestApi {
      * 복제지도의 변경사항 반영 요청 수락(원본지도에 변경 데이터 반영)
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param requestId
      * @return
      * @throws CloneNotSupportedException
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/merge")
-    public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId) throws CloneNotSupportedException {
+    @PostMapping("/{userId}/spaces/{spaceName}/requests/{requestId}/merge")
+    public ResponseEntity<?> mergeData(@PathVariable String userId, @PathVariable String spaceName, @PathVariable Long requestId) throws CloneNotSupportedException {
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null){
 
@@ -293,16 +287,16 @@ public class RequestApi {
      * 복제지도의 변경사항 반영 요청 거부
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param requestId
      * @return
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/requests/{requestId}/denied")
-    public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long requestId){
+    @PostMapping("/{userId}/spaces/{spaceName}/requests/{requestId}/denied")
+    public ResponseEntity<?> deniedData(@PathVariable String userId, @PathVariable String spaceName, @PathVariable Long requestId){
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null){
 
