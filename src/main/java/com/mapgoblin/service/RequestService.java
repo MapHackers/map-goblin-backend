@@ -1,8 +1,6 @@
 package com.mapgoblin.service;
 
-import com.mapgoblin.api.dto.request.CompareDto;
-import com.mapgoblin.api.dto.request.RequestDataDto;
-import com.mapgoblin.api.dto.request.RequestDto;
+import com.mapgoblin.api.dto.request.*;
 import com.mapgoblin.domain.*;
 import com.mapgoblin.domain.base.RequestAction;
 import com.mapgoblin.domain.base.RequestStatus;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,16 +43,16 @@ public class RequestService {
 
         requestRepository.save(request);
 
-        List<HashMap<String, String>> added = data.getAdded();
+        List<ChangeInfo> added = data.getAdded();
 
         if(added != null) {
-            for (HashMap<String, String> addedData : added) {
-                RequestData requestData = RequestData.create(Long.parseLong(addedData.get("id")),
-                        Long.parseLong(addedData.get("layerId")),
-                        addedData.get("name"),
-                        LocalDateTime.parse(addedData.get("createdDate")),
-                        addedData.get("geometry"),
-                        RequestAction.INSERT);
+            for (ChangeInfo addedData : added) {
+                RequestData requestData = RequestData.create(addedData.getId(),
+                addedData.getLayerId(),
+                addedData.getName(),
+                addedData.getCreateDate(),
+                addedData.getGeometry(),
+                RequestAction.INSERT);
 
                 request.addRequestData(requestData);
 
@@ -63,15 +60,15 @@ public class RequestService {
             }
         }
 
-        List<HashMap<String, String>> modified = data.getModified();
+        List<ChangeInfo> modified = data.getModified();
 
         if(modified != null) {
-            for (HashMap<String, String> modifiedData : modified) {
-                RequestData requestData = RequestData.create(Long.parseLong(modifiedData.get("id")),
-                        Long.parseLong(modifiedData.get("layerId")),
-                        modifiedData.get("name"),
-                        LocalDateTime.parse(modifiedData.get("createdDate")),
-                        modifiedData.get("geometry"),
+            for (ChangeInfo modifiedData : modified) {
+                RequestData requestData = RequestData.create(modifiedData.getId(),
+                        modifiedData.getLayerId(),
+                        modifiedData.getName(),
+                        modifiedData.getCreateDate(),
+                        modifiedData.getGeometry(),
                         RequestAction.UPDATE);
 
                 request.addRequestData(requestData);
@@ -80,15 +77,15 @@ public class RequestService {
             }
         }
 
-        List<HashMap<String, String>> delete = data.getDelete();
+        List<ChangeInfo> delete = data.getDelete();
 
         if(delete != null) {
-            for (HashMap<String, String> deleteData : delete) {
-                RequestData requestData = RequestData.create(Long.parseLong(deleteData.get("id")),
-                        Long.parseLong(deleteData.get("layerId")),
-                        deleteData.get("name"),
-                        LocalDateTime.parse(deleteData.get("createdDate")),
-                        deleteData.get("geometry"),
+            for (ChangeInfo deleteData : delete) {
+                RequestData requestData = RequestData.create(deleteData.getId(),
+                        deleteData.getLayerId(),
+                        deleteData.getName(),
+                        deleteData.getCreateDate(),
+                        deleteData.getGeometry(),
                         RequestAction.DELETE);
 
                 request.addRequestData(requestData);
@@ -97,15 +94,15 @@ public class RequestService {
             }
         }
 
-        List<HashMap<String, String>> layer = data.getLayer();
+        List<ChangeInfo> layer = data.getLayer();
 
         if(layer != null) {
-            for (HashMap<String, String> layerData : layer) {
+            for (ChangeInfo layerData : layer) {
                 RequestData requestData = RequestData.create(null,
-                        Long.parseLong(layerData.get("layerId")),
-                        layerData.get("name"),
-                        LocalDateTime.parse(layerData.get("createdDate")),
-                        layerData.get("geometry"),
+                        layerData.getLayerId(),
+                        layerData.getName(),
+                        layerData.getCreateDate(),
+                        layerData.getGeometry(),
                         RequestAction.INSERT);
 
                 request.addRequestData(requestData);
@@ -127,23 +124,23 @@ public class RequestService {
      * @param requestId
      * @return
      */
-    public HashMap<String, List<HashMap<String, String>>> findRequestInfoById(Long requestId) {
-        HashMap<String, List<HashMap<String, String>>> result = new HashMap<>();
+    public RequestDataDto findRequestInfoById(Long requestId) {
+        RequestDataDto result = new RequestDataDto();
 
         Request request = requestRepository.findById(requestId).orElse(null);
 
         if(request != null) {
 
             // request information
-            List<HashMap<String, String>> values = setRequestValues(request);
+            List<ValueDto> values = setRequestValues(request);
 
-            result.put("values", values);
+            result.setValues(values);
 
             // replies information
-            List<HashMap<String, String>> replies = setReplyValues(request);
+            List<ReplyDto> replies = setReplyValues(request);
 
             if(replies != null && !replies.isEmpty()){
-                result.put("replies", replies);
+                result.setReplies(replies);
             }
 
             // request data information
@@ -163,15 +160,15 @@ public class RequestService {
      * @param request
      * @return
      */
-    private List<HashMap<String, String>> setRequestValues(Request request) {
-        List<HashMap<String, String>> values = new ArrayList<>();
+    private List<ValueDto> setRequestValues(Request request) {
+        List<ValueDto> values = new ArrayList<>();
 
-        HashMap<String, String> value = new HashMap<>();
+        ValueDto value = new ValueDto();
 
-        value.put("title", request.getTitle());
-        value.put("content", request.getContent());
-        value.put("status", request.getStatus().toString());
-        value.put("createdBy", request.getCreatedBy());
+        value.setTitle(request.getTitle());
+        value.setContent(request.getContent());
+        value.setStatus(request.getStatus());
+        value.setCreatedBy(request.getCreatedBy());
 
         values.add(value);
 
@@ -184,23 +181,23 @@ public class RequestService {
      * @param request
      * @return
      */
-    private List<HashMap<String, String>> setReplyValues(Request request) {
-        List<HashMap<String, String>> replies = new ArrayList<>();
+    private List<ReplyDto> setReplyValues(Request request) {
+        List<ReplyDto> replies = new ArrayList<>();
 
         List<RequestReply> findReplies = requestReplyRepository.findByRequest(request).orElse(null);
 
         if(findReplies != null) {
             for (RequestReply findReply : findReplies) {
-                HashMap<String, String> replyData = new HashMap<>();
+                ReplyDto replyData = new ReplyDto();
 
                 Member replyMember = memberRepository.findByUserId(findReply.getCreatedBy()).orElse(null);
 
                 if(replyMember != null) {
-                    replyData.put("author", findReply.getCreatedBy());
-                    replyData.put("content", findReply.getContent());
-                    replyData.put("name", replyMember.getName());
-                    replyData.put("profile", replyMember.getProfile());
-                    replyData.put("datetime", findReply.getCreatedDate().toString());
+                    replyData.setAuthor(findReply.getCreatedBy());
+                    replyData.setContent(findReply.getContent());
+                    replyData.setName(replyMember.getName());
+                    replyData.setProfile(replyMember.getProfile());
+                    replyData.setDatetime(findReply.getCreatedDate());
 
                     replies.add(replyData);
                 }
@@ -218,61 +215,28 @@ public class RequestService {
      * @param result
      * @param request
      */
-    private void setRequestDataValues(HashMap<String, List<HashMap<String, String>>> result, Request request) {
+    private void setRequestDataValues(RequestDataDto result, Request request) {
         List<RequestData> requestDataList = request.getRequestDataList();
 
         if(requestDataList != null) {
-            List<HashMap<String, String>> added = new ArrayList<>();
-            List<HashMap<String, String>> modified = new ArrayList<>();
-            List<HashMap<String, String>> delete = new ArrayList<>();
-            List<HashMap<String, String>> layer = new ArrayList<>();
-
             for (RequestData requestData : requestDataList) {
-                HashMap<String, String> data = new HashMap<>();
-
-                if(requestData.getMapDataId() == null){
-                    data.put("mapDataId", null);
-                }else{
-                    data.put("mapDataId", requestData.getMapDataId().toString());
-                }
-
-                data.put("layerId", requestData.getLayerId().toString());
-                data.put("geometry", requestData.getGeometry());
-                data.put("action", requestData.getAction().toString());
-                data.put("name", requestData.getName());
-                data.put("createdDate", requestData.getCreateDate().toString());
+                ChangeInfo data = ChangeInfo.byRequestData(requestData);
 
                 if(requestData.getAction() == RequestAction.INSERT){
                     if(requestData.getMapDataId() == null){
                         //layer
-                        layer.add(data);
+                        result.getLayer().add(data);
                     }else{
                         //added
-                        added.add(data);
+                        result.getAdded().add(data);
                     }
                 }else if(requestData.getAction() == RequestAction.UPDATE){
                     //modified
-                    modified.add(data);
+                    result.getModified().add(data);
                 }else if(requestData.getAction() == RequestAction.DELETE){
                     //delete
-                    delete.add(data);
+                    result.getDelete().add(data);
                 }
-            }
-
-            if(!added.isEmpty()){
-                result.put("added", added);
-            }
-
-            if(!modified.isEmpty()){
-                result.put("modified", modified);
-            }
-
-            if(!delete.isEmpty()){
-                result.put("delete", delete);
-            }
-
-            if(!layer.isEmpty()){
-                result.put("layer", layer);
             }
         }
     }
@@ -306,32 +270,19 @@ public class RequestService {
             for (Layer hostLayer : hostLayers) {
                 for (Layer clonedLayer : clonedLayers) {
                     if(clonedLayer.getHost() == hostLayer){
-                        List<MapData> hostMapDataList = hostLayer.getMapDataList();
-                        List<MapData> cloneMapDataList = clonedLayer.getMapDataList();
-
                         //지오메트리 hash
-                        HashMap<String, MapData> hostGeom = new HashMap<>();
-                        HashMap<String, MapData> cloneGeom = new HashMap<>();
-
-                        for (MapData mapData : hostMapDataList) {
-                            hostGeom.put(mapData.getGeometry(), mapData);
-                        }
-
-                        for (MapData mapData : cloneMapDataList) {
-                            cloneGeom.put(mapData.getGeometry(), mapData);
-                        }
-
-                        List<String> geoms = new ArrayList<>();
+                        HashMap<String, MapData> hostGeom = getGeometryHashMap(hostLayer);
+                        HashMap<String, MapData> cloneGeom = getGeometryHashMap(clonedLayer);
 
                         // 삭제된 데이터
-                        List<CompareDto> deleteList = detectData(hostGeom, cloneGeom, geoms, hostLayer.getId());
+                        List<CompareDto> deleteList = detectData(hostGeom, cloneGeom, hostLayer.getId());
 
                         if(!deleteList.isEmpty()){
                             result.put("delete", deleteList);
                         }
 
                         //추가된 데이터
-                        List<CompareDto> addedList = detectData(cloneGeom, hostGeom, geoms, hostLayer.getId());
+                        List<CompareDto> addedList = detectData(cloneGeom, hostGeom, hostLayer.getId());
 
                         if(!addedList.isEmpty()){
                             result.put("added", addedList);
@@ -354,6 +305,18 @@ public class RequestService {
         return result;
     }
 
+    private HashMap<String, MapData> getGeometryHashMap(Layer layer) {
+        List<MapData> mapDataList = layer.getMapDataList();
+
+        HashMap<String, MapData> result = new HashMap<>();
+
+        for (MapData mapData : mapDataList) {
+            result.put(mapData.getGeometry(), mapData);
+        }
+
+        return result;
+    }
+
 
     /**
      * 새로 생긴 레이어 감지
@@ -366,16 +329,9 @@ public class RequestService {
 
         for (Layer clonedLayer : clonedLayers) {
             if(clonedLayer.getHost() == null){
-                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(null, clonedLayer.getId(), RequestStatus.WAITING).orElse(null);
+                CompareDto compareDto = getCompareDto(clonedLayer);
 
-                if(findRequestData == null){
-                    CompareDto compareDto = new CompareDto();
-                    compareDto.setId(clonedLayer.getId());
-                    compareDto.setLayerId(clonedLayer.getId());
-                    compareDto.setName(clonedLayer.getName());
-                    compareDto.setCreatedDate(clonedLayer.getModifiedDate());
-                    compareDto.setGeometry(null);
-
+                if(compareDto != null) {
                     result.add(compareDto);
                 }
             }
@@ -389,39 +345,29 @@ public class RequestService {
      *
      * @param target
      * @param comparisonTarget
-     * @param geoms
      * @param hostLayerId
      * @return
      */
     private List<CompareDto> detectData(HashMap<String, MapData> target, HashMap<String, MapData> comparisonTarget,
-                                               List<String> geoms, Long hostLayerId) {
+                                               Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
+        List<String> detectGeoms = new ArrayList<>();
 
-        target.forEach((s, mapData) -> {
-            if(!comparisonTarget.containsKey(s)){
-                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+        target.forEach((geom, mapData) -> {
+            if(!comparisonTarget.containsKey(geom)){
+                CompareDto compareDto = getCompareDto(geom, mapData, hostLayerId);
 
-                if(findRequestData == null){
-                    CompareDto compareDto = new CompareDto();
-                    compareDto.setId(mapData.getId());
-                    compareDto.setLayerId(hostLayerId);
-                    compareDto.setName(mapData.getName());
-                    compareDto.setCreatedDate(mapData.getModifiedDate());
-                    compareDto.setGeometry(s);
-
+                if(compareDto != null) {
                     result.add(compareDto);
-
                 }
 
-                geoms.add(s);
+                detectGeoms.add(geom);
             }
         });
 
-        for (String geom : geoms) {
+        for (String geom : detectGeoms) {
             target.remove(geom);
         }
-
-        geoms.clear();
 
         return result;
     }
@@ -438,26 +384,53 @@ public class RequestService {
                                                 Long hostLayerId) {
         List<CompareDto> result = new ArrayList<>();
 
-        cloneGeom.forEach((s, mapData) -> {
-            MapData hostData = hostGeom.get(s);
+        cloneGeom.forEach((geom, mapData) -> {
+            MapData hostData = hostGeom.get(geom);
 
             if(!mapData.equals(hostData)){
-                RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+                CompareDto compareDto = getCompareDto(geom, mapData, hostLayerId);
 
-                if(findRequestData == null){
-                    CompareDto compareDto = new CompareDto();
-                    compareDto.setId(mapData.getId());
-                    compareDto.setLayerId(hostLayerId);
-                    compareDto.setName(mapData.getName());
-                    compareDto.setCreatedDate(mapData.getModifiedDate());
-                    compareDto.setGeometry(s);
-
+                if(compareDto != null) {
                     result.add(compareDto);
                 }
             }
         });
 
         return result;
+    }
+
+    private CompareDto getCompareDto(String geom, MapData mapData, Long hostLayerId) {
+        RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(mapData.getId(), hostLayerId, RequestStatus.WAITING).orElse(null);
+
+        if(findRequestData == null){
+            CompareDto compareDto = new CompareDto();
+            compareDto.setId(mapData.getId());
+            compareDto.setLayerId(hostLayerId);
+            compareDto.setName(mapData.getName());
+            compareDto.setCreatedDate(mapData.getModifiedDate());
+            compareDto.setGeometry(geom);
+
+            return compareDto;
+        }
+
+        return null;
+    }
+
+    private CompareDto getCompareDto(Layer layer) {
+        RequestData findRequestData = requestDataRepository.findByMapDataIdAndLayerIdAndStatus(null, layer.getId(), RequestStatus.WAITING).orElse(null);
+
+        if(findRequestData == null){
+            CompareDto compareDto = new CompareDto();
+            compareDto.setId(layer.getId());
+            compareDto.setLayerId(layer.getId());
+            compareDto.setName(layer.getName());
+            compareDto.setCreatedDate(layer.getModifiedDate());
+            compareDto.setGeometry(null);
+
+            return compareDto;
+        }
+
+        return null;
     }
 
     /**

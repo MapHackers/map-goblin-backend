@@ -12,7 +12,8 @@ public class ApiException {
 
     @ExceptionHandler
     public ResponseEntity<ErrorResult> generalServerException(Exception e) {
-        log.error("{}", e.getMessage());
+        log.error("ApiException");
+        e.printStackTrace();
         ErrorResult errorResult = new ErrorResult("server-exception", "서버 에러 발생");
         return new ResponseEntity<>(errorResult, HttpStatus.INTERNAL_SERVER_ERROR);
     }
