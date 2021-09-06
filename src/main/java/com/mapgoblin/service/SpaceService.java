@@ -42,14 +42,14 @@ public class SpaceService {
     }
 
     /**
-     * Find one by userId, repositoryName
+     * Find one by userId, spaceName
      *
      * @param memberId
-     * @param repoName
+     * @param spaceName
      * @return
      */
-    public SpaceResponse findOne(Long memberId, String repoName){
-        return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, repoName)
+    public SpaceResponse findOne(Long memberId, String spaceName){
+        return memberSpaceRepository.findByMemberIdAndSpaceName(memberId, spaceName)
                 .stream()
                 .findFirst()
                 .orElse(null);

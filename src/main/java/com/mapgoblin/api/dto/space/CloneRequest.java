@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloneRequest {
-    private Long repositoryId;
+    private Long spaceId;
 }

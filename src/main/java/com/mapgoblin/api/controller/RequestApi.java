@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.NotSupportedException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class RequestApi {
     private final MemberService memberService;
     private final AlarmService alarmService;
     private final MemberSpaceService memberSpaceService;
+    private final DetectServiceResolver detectServiceResolver;
 
     /**
      * 요청사항 리스트 조회
@@ -125,9 +127,9 @@ public class RequestApi {
      */
     @GetMapping("/{userId}/spaces/{spaceName}/compare")
     public ResponseEntity<?> compareOriginClone(@PathVariable String userId, @PathVariable String spaceName,
-                                                @AuthenticationPrincipal Member member) {
+                                                @AuthenticationPrincipal Member member) throws NotSupportedException {
 
-        HashMap<String, List<CompareDto>> result;
+        RequestDataDto result;
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -139,7 +141,11 @@ public class RequestApi {
 
             if(clonedSpaceResponse != null){
 
-                result = requestService.compareMapData(originSpaceResponse.getId(), clonedSpaceResponse.getId());
+                Space clonedSpace = spaceService.findById(clonedSpaceResponse.getId());
+
+                DetectService detectService = detectServiceResolver.resolve("REQUEST");
+
+                result = detectService.compareMapData(originSpaceResponse.getId(), clonedSpace);
 
                 if(result.isEmpty()){
                     return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
@@ -180,9 +186,9 @@ public class RequestApi {
      */
     @GetMapping("/{userId}/spaces/{spaceName}/pull/compare")
     public ResponseEntity<?> comparePullData(@PathVariable String userId, @PathVariable String spaceName,
-                                             @AuthenticationPrincipal Member member){
+                                             @AuthenticationPrincipal Member member) throws NotSupportedException {
 
-        HashMap<String, List<CompareDto>> result;
+        RequestDataDto result;
 
         Member findMember = memberService.findByUserId(userId);
 
@@ -192,20 +198,22 @@ public class RequestApi {
 
             List<MemberSpace> spacesOfMember = memberSpaceService.findSpacesOfMember(member);
             Space clonedSpace = spaceService.findById(spaceResponse.getId());
-            boolean ownerCheck = true;
+            boolean ownerCheck = false;
 
             for (MemberSpace memberSpace : spacesOfMember) {
                 if(memberSpace.getSpace() == clonedSpace){
-                    ownerCheck = false;
+                    ownerCheck = true;
                     break;
                 }
             }
 
-            if(ownerCheck){
+            if(!ownerCheck){
                 return ApiResult.errorMessage("주인이 아닙니다.", HttpStatus.OK);
             }
 
-            result = requestService.comparePullData(spaceResponse.getHostId(), clonedSpace);
+            DetectService detectService = detectServiceResolver.resolve("PULL");
+
+            result = detectService.compareMapData(spaceResponse.getHostId(), clonedSpace);
 
             if(result.isEmpty()){
                 return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);

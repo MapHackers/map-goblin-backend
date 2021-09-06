@@ -5,7 +5,6 @@ import com.mapgoblin.api.dto.map.CreateMapDataRequest;
 import com.mapgoblin.api.dto.map.LayerDto;
 import com.mapgoblin.domain.Layer;
 import com.mapgoblin.domain.Map;
-import com.mapgoblin.domain.mapdata.MapData;
 import com.mapgoblin.domain.mapdata.Point;
 import com.mapgoblin.service.LayerService;
 import com.mapgoblin.service.MapDataService;
@@ -52,9 +51,6 @@ public class MapApi {
         if (layer == null){
             // 만약 요청해온 레이어가 현재 디비에 없는 경우 새로 레이어를 만들어 준다.
             // 만든 뒤에 이 레이어에 맵 데이터를 추가
-            System.out.println("/////////////////////////////////////////");
-            System.out.println("Layer NULLLLLL");
-            System.out.println("/////////////////////////////////////////");
             Layer newLayer = Layer.createLayer(request.getLayerName());
             layerService.save(map, newLayer);
             layer = newLayer;
@@ -132,20 +128,12 @@ public class MapApi {
      */
     @GetMapping("/{mapId}")
     public ResponseEntity<?> getMapDataListByLayerId(@PathVariable Long mapId) {
-        Map map = mapService.findByMapId(mapId);
         List<Layer> layerList = layerService.findByMapId(mapId);
-        System.out.println("---------------------------------------------------------");
-        System.out.println("MAP " + map.getLayers());
-        System.out.println("---------------------------------------------------------");
-//        Layer layer = layerService.findByLayerName(request.getLayerName());
-//        List<MapData> mapDataList =  layer.getMapDataList();
-        System.out.println("/////////////////////////////////////////////////////////");
 
         List<LayerDto> collect = layerList.stream()
                 .map(layer -> new LayerDto(layer))
                 .collect(Collectors.toList());
 
-        System.out.println("/////////////////////////////////////////////////////////");
         return ResponseEntity.ok(new ApiResult(collect));
     }
 }
