@@ -19,13 +19,6 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    public List<Review> findByMapDataId(Long id){
-        System.out.println("=========================================" +
-                "FindbyMapdataID Service");
-        return reviewRepository.findByMapDataId(id)
-                .orElse(null);
-    }
-
     public List<Review> findByMapData(MapData mapdata){
         return reviewRepository.findByMapData(mapdata)
                 .orElse(null);

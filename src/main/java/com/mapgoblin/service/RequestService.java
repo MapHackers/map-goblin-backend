@@ -147,7 +147,6 @@ public class RequestService {
 
             return result;
         }else {
-            System.out.println("request is null");
             return null;
         }
 

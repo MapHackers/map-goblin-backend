@@ -37,9 +37,6 @@ public class Map extends BaseEntity implements Cloneable {
     public void addLayer(Layer layer) {
         this.layers.add(layer);
         layer.setMap(this);
-        System.out.println("*************************************************");
-        System.out.println(this.layers);
-        System.out.println("*************************************************");
     }
 
     @Override

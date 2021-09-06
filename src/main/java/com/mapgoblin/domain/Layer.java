@@ -72,7 +72,6 @@ public class Layer extends BaseEntity implements Cloneable {
 
         });
         for (MapData mapData : list) {
-            System.out.println(mapData.getClass());
             try{
                 MapData clone = (MapData) mapData.clone();
                 clone.setLayer(layer);

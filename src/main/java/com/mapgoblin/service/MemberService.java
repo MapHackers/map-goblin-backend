@@ -3,7 +3,6 @@ package com.mapgoblin.service;
 import com.mapgoblin.api.dto.member.CreateMemberResponse;
 import com.mapgoblin.api.dto.member.EditProfileResponse;
 import com.mapgoblin.domain.Member;
-import com.mapgoblin.exception.UserNotFoundException;
 import com.mapgoblin.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,9 +38,6 @@ public class MemberService implements UserDetailsService {
      * @return
      */
     public Member findByUserId(String userId) {
-
-//        return memberRepository.findByUserId(userId)
-//                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
         return memberRepository.findByUserId(userId)
                 .orElse(null);
     }
@@ -68,8 +63,6 @@ public class MemberService implements UserDetailsService {
     public CreateMemberResponse save(Member member) {
 
         memberRepository.save(member);
-        System.out.println("===================================================");
-        System.out.println(member.getDescription());
 
         return new CreateMemberResponse(member.getId(), member.getUserId(), member.getName(), member.getEmail(), member.getDescription());
     }
@@ -115,9 +108,6 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        return memberRepository.findByUserId(username)
-//                .orElseThrow(() -> new UserNotFoundException("가입되지 않은 아이디 입니다."));
-
         return memberRepository.findByUserId(username)
                 .orElse(null);
     }
