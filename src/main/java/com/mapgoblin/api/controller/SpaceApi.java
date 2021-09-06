@@ -100,7 +100,7 @@ public class SpaceApi {
     }
 
     /**
-     * Create repository
+     * Create space
      *
      * @param request
      * @param member
@@ -127,7 +127,7 @@ public class SpaceApi {
     }
 
     /**
-     * Clone repository
+     * Clone space
      *
      * @param cloneRequest
      * @param member
@@ -136,13 +136,13 @@ public class SpaceApi {
     @PostMapping("/spaces/clone")
     public ResponseEntity<?> spaceClone(@RequestBody CloneRequest cloneRequest, @AuthenticationPrincipal Member member){
 
-        Space hostSpace = spaceService.findById(cloneRequest.getRepositoryId());
+        Space hostSpace = spaceService.findById(cloneRequest.getSpaceId());
 
         if (hostSpace == null){
             return ApiResult.errorMessage("없는 지도 클론", HttpStatus.CONFLICT);
         }
 
-        SpaceResponse spaceResponse = spaceService.findOne(member.getId(), cloneRequest.getRepositoryId());
+        SpaceResponse spaceResponse = spaceService.findOne(member.getId(), cloneRequest.getSpaceId());
 
         if (spaceResponse != null){
             return ApiResult.errorMessage("이미 클론 한 지도입니다.", HttpStatus.CONFLICT);
@@ -150,7 +150,7 @@ public class SpaceApi {
 
         CreateSpaceResponse result = spaceService.clone(member.getId(), hostSpace);
 
-        alarmService.save(cloneRequest.getRepositoryId(), AlarmType.CLONE);
+        alarmService.save(cloneRequest.getSpaceId(), AlarmType.CLONE);
 
         if(result == null){
             return ApiResult.errorMessage("지도 클론 에러", HttpStatus.CONFLICT);

@@ -23,4 +23,8 @@ public class RequestDataDto {
         layer = new ArrayList<>();
         replies = new ArrayList<>();
     }
+
+    public boolean isEmpty() {
+        return added.isEmpty() && modified.isEmpty() && delete.isEmpty() && layer.isEmpty();
+    }
 }

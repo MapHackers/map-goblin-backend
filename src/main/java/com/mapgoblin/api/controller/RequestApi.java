@@ -147,7 +147,7 @@ public class RequestApi {
 
                 result = detectService.compareMapData(originSpaceResponse.getId(), clonedSpace);
 
-                if(result == null){
+                if(result.isEmpty()){
                     return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
                 }
 
@@ -215,7 +215,7 @@ public class RequestApi {
 
             result = detectService.compareMapData(spaceResponse.getHostId(), clonedSpace);
 
-            if(result == null){
+            if(result.isEmpty()){
                 return ApiResult.errorMessage("변경된 데이터가 없습니다.", HttpStatus.OK);
             }
 

@@ -41,16 +41,16 @@ public class IssueApi {
      *
      * @param request
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @return
      */
-    @PostMapping("/{userId}/spaces/{repositoryName}/issues")
+    @PostMapping("/{userId}/spaces/{spaceName}/issues")
     public ResponseEntity<?> create(@RequestBody CreateIssueRequest request,
-                                    @PathVariable String userId, @PathVariable String repositoryName){
+                                    @PathVariable String userId, @PathVariable String spaceName){
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null) {
             Space space = spaceService.findById(spaceResponse.getId());
@@ -66,20 +66,20 @@ public class IssueApi {
     }
 
     /**
-     * get issue list for one repository
+     * get issue list for one space
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/issues")
-    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName,
+    @GetMapping("/{userId}/spaces/{spaceName}/issues")
+    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String spaceName,
                                           @RequestParam String status,
                                           @PageableDefault(size = 8, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Member findMember = memberService.findByUserId(userId);
 
-        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+        SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
         if (spaceResponse != null) {
             Space space = spaceService.findById(spaceResponse.getId());
@@ -101,12 +101,12 @@ public class IssueApi {
      * get one issue information
      *
      * @param userId
-     * @param repositoryName
+     * @param spaceName
      * @param id
      * @return
      */
-    @GetMapping("/{userId}/spaces/{repositoryName}/issues/{id}")
-    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
+    @GetMapping("/{userId}/spaces/{spaceName}/issues/{id}")
+    public ResponseEntity<?> getIssueList(@PathVariable String userId, @PathVariable String spaceName, @PathVariable Long id) {
 
         Issue issue = issueService.findIssueById(id);
         Member member = memberService.findByUserId(issue.getCreatedBy());
@@ -124,13 +124,13 @@ public class IssueApi {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/{userId}/spaces/{repositoryName}/issues/{id}/check")
-    public ResponseEntity<?> checkIssue(@PathVariable String userId, @PathVariable String repositoryName, @PathVariable Long id) {
+    @PostMapping("/{userId}/spaces/{spaceName}/issues/{id}/check")
+    public ResponseEntity<?> checkIssue(@PathVariable String userId, @PathVariable String spaceName, @PathVariable Long id) {
         if(issueService.setChecked(id)){
 
             Member findMember = memberService.findByUserId(userId);
 
-            SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), repositoryName);
+            SpaceResponse spaceResponse = spaceService.findOne(findMember.getId(), spaceName);
 
             if (spaceResponse != null){
                 Issue issue = issueService.findIssueById(id);
